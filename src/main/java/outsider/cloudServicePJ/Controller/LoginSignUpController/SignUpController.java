@@ -7,22 +7,35 @@ import java.util.Random;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import outsider.cloudServicePJ.mapper.signUpMapper;
+
 import java.util.Properties;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
+// @RestController
 public class SignUpController {
-    @RequestMapping(value = "/signUpCertification")
-    public Map<String, Object> signUpCertification(@RequestParam String id) throws MessagingException{
+    @Autowired
+    private signUpMapper signUpMapper;
+
+    @PostMapping(value = "/signUpCertification")
+    public Map<String, Object> signUpCertification(@RequestBody Map<String, Object> data) throws MessagingException{
         Map<String, Object> result = new HashMap<>();
 
-        String hostMail = id; // 받는 사람 이메일 주소
+        String hostMail = (String) data.get("id"); // 받는 사람 이메일 주소
         String fromMail = "dhsb123@naver.com"; // 발신자 아이디 (이메일 앞부분)
         String fromMailPw = "1q2w3e4r!#"; // 발신자 비밀번호
+
+        // 등록된 계정인지 확인
+        int cnt = signUpMapper.userInfoCnt(hostMail);
+
+        if(cnt > 1){
+            result.put("msg", "이미 등록된 E-mail입니다.");
+        }else{
+
+        }
 
         String authCode = String.format("%06d", new Random().nextInt(999999));
 

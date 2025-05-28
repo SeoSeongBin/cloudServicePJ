@@ -3,6 +3,7 @@ import React, {useState} from "react";
 function Sign_up() {
     let [frontMail, setFrontMail] = useState("");
     let [endMail, setEndMail] = useState("");
+    let [name, setName] = useState("");
 
     // 인증버튼 클릭시 작동하는 로직
     const certificationFuntion = () => {
@@ -13,6 +14,7 @@ function Sign_up() {
                     },
                     body: new URLSearchParams({
                         id: frontMail+"@"+endMail,
+                        name: name
                     })
                 })
                 .then((res) => res.json())
@@ -34,6 +36,7 @@ function Sign_up() {
                         type="text"
                         className="name"
                         placeholder="이름(닉네임)을 입력해주세요"
+                        onChange={(e)=>setName(e.target.value)}
                     />
                 </div>
                 <div className="sign_up_id">

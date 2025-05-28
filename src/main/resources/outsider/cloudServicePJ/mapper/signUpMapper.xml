@@ -2,6 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="outsider.cloudServicePJ.mapper.signUpMapper">
     <!-- <resultMap type="outsider.cloudServicePJ.VO.LoginVO" id="LoginResultMap"> -->
+    <select id="userInfoCnt" resultType="outsider.cloudServicePJ.VO.LoginVO">
+        SELECT
+            COUNT(*) AS CNT
+        FROM
+            USER_INFO
+        WHERE
+            UI_EMAIL = #{id}
+    </select>
     <insert id="signUpAuthInsert">
         INSERT INTO USER_CERTIFICATION_EMAIL_LOG
         (
