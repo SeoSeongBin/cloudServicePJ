@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="outsider.cloudServicePJ.mapper.signUpMapper">
+    <!-- <resultMap type="outsider.cloudServicePJ.VO.LoginVO" id="LoginResultMap"> -->
+    <insert id="signUpAuthInsert">
+        INSERT INTO USER_CERTIFICATION_EMAIL_LOG
+        (
+            UCEL_UI_EMAIL,
+            UCEL_UI_NAME,
+            UCEL_AUTH_CODE,
+            UCEL_REG_DATE
+        )
+        VALUES(
+            #{email},
+            #{name},
+            #{auth_code},
+            now()
+        );
+    </insert>
+    <update id="signUpAuthUpdate">
+        UPDATE USER_CERTIFICATION_EMAIL_LOG
+        SET
+            UCEL_AUTH_YN = 'Y',
+            UCEL_AUTH_DATE = now()
+        WHERE
+            UCEL_UI_EMAIL = #{email},
+            UCEL_UI_NAME = #{name},
+            UCEL_AUTH_CODE = #{auth_code}
+    </update>
+</mapper>

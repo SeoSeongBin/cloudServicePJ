@@ -9,6 +9,5 @@
 <body>
   <div id="root"></div>
 
-  <script src="react/static/js/main.b86bc580.js"></script>
 </body>
 </html>

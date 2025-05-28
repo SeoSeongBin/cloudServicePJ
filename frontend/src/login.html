@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 페이지 구현</title>
+</head>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // id 입력 요소에 포커스 이벤트
+    document.querySelectorAll('.id').forEach(function(el) {
+        el.addEventListener('focus', function() {
+        document.querySelectorAll('.login_id_box').forEach(function(box) {
+            box.classList.add('on');
+        });
+        });
+        el.addEventListener('blur', function() {
+        document.querySelectorAll('.login_id_box').forEach(function(box) {
+            box.classList.remove('on');
+        });
+        });
+    });
+
+    // pw 입력 요소에 포커스 이벤트
+    document.querySelectorAll('.pw').forEach(function(el) {
+        el.addEventListener('focus', function() {
+        document.querySelectorAll('.login_pw_box').forEach(function(box) {
+            box.classList.add('on');
+        });
+        });
+        el.addEventListener('blur', function() {
+        document.querySelectorAll('.login_pw_box').forEach(function(box) {
+            box.classList.remove('on');
+        });
+        });
+    });
+    });
+
+</script>
+<link rel="stylesheet" href="./reset.css">
+<style>
+    .login_wrap{
+        width: 100dvw;
+        height: 100dvh;
+    }
+    .login_box{
+        position: relative;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 10px;
+        border: 1px solid #e0e0e0;
+        width: 30vw;
+        max-width: 400px;
+        border-radius: 10px;
+    }
+    .login_logo {
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        padding: 20px;
+        margin-bottom: 10px;
+    }
+    .login_id_box, .login_pw_box {
+        box-sizing: border-box;
+        border: 1px solid #ddd;
+        padding: 10px;
+    }
+    .login_id_box {
+        border-radius: 10px 10px 0 0;
+        border-bottom: 1.5px solid rgba(0, 0, 0, 0);
+    }
+    .login_pw_box {
+        border-radius: 0 0 10px 10px;
+        border-top: 1.5px solid #ddd;
+    }
+
+    .login_id_box.on, .login_pw_box.on {
+        border: 1.5px solid #6c91ff;
+    }
+    .login_input_area {
+        margin-bottom: 10px;
+    }
+    .login_input_area input {
+        width: calc(100% - 10px);
+        border: none;
+        font-size: 17px;
+    }
+    .login_input_area input:focus {
+        outline: none;
+    }
+    .login_input_area p {
+        font-size: 12px;
+        color: #919191;
+        margin-bottom: 5px;
+    }
+    .login_btn_area {
+        font-size: 0;
+    }
+    .login_btn_area button {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        width: 100%;
+        display: inline-block;
+        cursor: pointer;
+        padding: 10px;
+        border: none;
+        font-size: 18px;
+        border-radius: 5px;
+    }
+    .login_btn_area .login_btn {
+        margin-bottom: 5px;
+        background-color: #6c91ff;
+        font-weight: bold;
+        color: #fff;
+    }
+    .login_btn_area .sign_up {
+        margin-bottom: 5px;
+        background-color: #ddd;
+        font-weight: bold;
+        color: #fff;
+    }
+</style>
+<body>
+    <div class="login_wrap">
+        <div class="login_box">
+            <h2 class="login_logo">CloudProject</h2>
+            <div class="login_input_area">
+                <div class="login_id_box">
+                    <p>아이디를 입력해주세요</p>
+                    <input type="text" class="id">
+                </div>
+                <div class="login_pw_box">
+                    <p>비밀번호를 입력해주세요</p>
+                    <input type="password" class="pw">
+                </div>
+            </div>
+            <div class="login_btn_area">
+                <button class="login_btn">로그인</button>
+                <button class="sign_up">회원가입</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

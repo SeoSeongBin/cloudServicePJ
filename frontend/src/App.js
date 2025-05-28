@@ -1,24 +1,22 @@
-import logo from './logo.svg';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import './App.css';
+import Login from './login';
+import Sign_up from './sign_up';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+
+        {/* 루트 경로 접속 시 /login으로 리다이렉트 */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* 다른 경로들이 있다면 추가 */}
+        <Route path="/sign_up" element={<Sign_up />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

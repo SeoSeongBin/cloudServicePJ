@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .sign_up_wrap{
+            width: 40vw;
+            min-width: 300px;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+        .sign_up_area {
+            font-size: 0;
+        }
+        .login_logo {
+            font-size: 24px;
+            text-align: center;
+        }
+        .sign_up_area div {
+            width: 100%;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .sign_up_area div:last-child {
+            border: none;
+        }
+        .sign_up_area div p {
+            font-size: 16px;
+            margin: 0;
+            margin-bottom: 5px;
+        }
+        .sign_up_area div span {
+            font-size: 16px;
+            margin: 0 5px;
+        }
+        .sign_up_area div input,
+        .sign_up_area div select{
+            width: 100%;
+            padding: 10px 0;
+            font-size: 17px;
+            border: none;
+        }
+
+        .sign_up_area div input:focus {
+            outline: none;
+        }
+
+        .sign_up_area .sign_up_id input {
+            width: calc(50% - 88px);
+        }
+
+        .sign_up_area button {
+            height: 40px;
+            width: 100%;
+            font-size: 17px;
+        }
+        .sign_up_area button.certification_btn {
+            width: 150px;
+            font-size: 14px;
+            border: none;
+            background-color: #4a97e7;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .sign_up_area button.sign_up_btn {
+            border: none;
+            font-weight: bold;
+            color: #ddd;
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="sign_up_wrap">
+        <div class="sign_up_area">
+            <h2 class="login_logo">CloudProject</h2>
+            <div class="sign_up_name">
+                <p>이름(닉네임)</p>
+                <input type="text" class="name" placeholder="이름(닉네임)을 입력해주세요" />
+            </div>
+            <div class="sign_up_id">
+                <p>아이디(E-mail)</p>
+                <input type="text" class="idVal1" placeholder="이메일을 입력해주세요" />
+                <span>@</span>
+                <input type="text" class="idVal3" />
+                <button class="certification_btn">인증요청</button>
+            </div>
+            <div class="sign_up_pw">
+                <p>비밀번호</p>
+                <input type="password" class="pw" placeholder="비밀번호를 입력해주세요" />
+            </div>
+            <div class="sign_up_pw">
+                <p>비밀번호 재확인</p>
+                <input type="password" class="pw_check" placeholder="비밀번호를 다시 입력해주세요" />
+            </div>
+            <div class="sign_up_phone">
+                <p>핸드폰 뒷자리</p>
+                <input type="text" class="phone_num" maxlength="4" placeholder="핸드폰 뒤 4자리를 입력해주세요" />
+            </div>
+            <div class="sign_up_btn_area">
+                <button class="sign_up_btn">가입하기</button>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
