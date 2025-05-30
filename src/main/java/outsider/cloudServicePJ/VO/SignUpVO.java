@@ -13,4 +13,5 @@ public class SignUpVO {
     private Date UCEL_REG_DATE;
     private String UCEL_AUTH_YN;
     private Date UCEL_AUTH_DATE;
+    private Integer CNT;
 }

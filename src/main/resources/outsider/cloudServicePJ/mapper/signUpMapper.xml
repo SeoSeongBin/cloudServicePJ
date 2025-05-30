@@ -10,6 +10,14 @@
         WHERE
             UI_EMAIL = #{id}
     </select>
+    <select id="authInfoCnt" resultType="outsider.cloudServicePJ.VO.LoginVO">
+        SELECT
+            COUNT(*) AS CNT
+        FROM
+            USER_INFO
+        WHERE
+            UI_EMAIL = #{id}
+    </select>
     <insert id="signUpAuthInsert">
         INSERT INTO USER_CERTIFICATION_EMAIL_LOG
         (
