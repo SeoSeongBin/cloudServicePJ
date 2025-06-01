@@ -12,8 +12,9 @@ import outsider.cloudServicePJ.mapper.signUpMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-// @RestController
+@RestController
 public class SignUpController {
     @Autowired
     private signUpMapper signUpMapper;
@@ -27,12 +28,14 @@ public class SignUpController {
         String fromMailPw = "1q2w3e4r!#"; // 발신자 비밀번호
         try{
             // 등록된 계정인지 확인
-            int cnt = signUpMapper.userInfoCnt(hostMail);
+            int cnt = signUpMapper.userInfoCntData(hostMail);
     
             if(cnt > 1){
                 result.put("msg", "이미 등록된 E-mail입니다.");
             }else{
                 String authCode = String.format("%06d", new Random().nextInt(999999));
+
+                data.put("auth_code", authCode);
     
                 Properties props = new Properties();
                 props.put("mail.smtp.auth", "true");
@@ -52,7 +55,7 @@ public class SignUpController {
                 message.setSubject("인증 요청 메일입니다.");
                 message.setText("인증코드는: " + authCode);
                 
-                signUpMapper.signUpAuthInsert(data);
+                signUpMapper.signUpAuthInsertData(data);
                 Transport.send(message);
     
                 result.put("msg", "메일전송이 완료회었습니다.");
@@ -69,13 +72,34 @@ public class SignUpController {
     public Map<String, Object> signUpAuth(@RequestBody Map<String, Object> data) throws MessagingException{
         Map<String, Object> result = new HashMap<>();
         try{
-            int cnt = signUpMapper.authInfoCnt(data);
-            if(cnt < 1){
-                signUpMapper.signUpAuthUpdate(data);
-                result.put("msg", "메일인증이 완료되었습니다.");
-            }else{
+            int cnt = signUpMapper.authInfoCntData(data);
+            if(cnt < 0){
                 result.put("msg", "인증요청을 해주세요.");
+            }else{
+                signUpMapper.signUpAuthUpData(data);
+                result.put("msg", "메일인증이 완료되었습니다.");
             }
+            result.put("success", true);
+        }catch(Exception e){
+            e.printStackTrace(); // 또는 로깅
+            result.put("success", false);
+            result.put("msg", "인증중 오류가 발생하였습니다.");
+        }
+        return result;
+    }
+    @PostMapping(value = "/signUpInsert")
+    public Map<String, Object> signUpInsert(@RequestBody Map<String, Object> data) throws MessagingException{
+        Map<String, Object> result = new HashMap<>();
+        try{
+            Integer cnt = signUpMapper.authYNInfoCntData(data);
+            System.out.println("cnt : "+cnt);
+            if(cnt < 0){
+                result.put("msg", "인증을 완료해주세요.");
+            }else{
+                signUpMapper.signUpInsertData(data);
+                result.put("msg", "가입이 완료되었습니다.");
+            }
+            result.put("success", true);
         }catch(Exception e){
             e.printStackTrace(); // 또는 로깅
             result.put("success", false);

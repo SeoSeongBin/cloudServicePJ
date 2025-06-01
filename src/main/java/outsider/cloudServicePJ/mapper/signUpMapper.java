@@ -3,12 +3,12 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import outsider.cloudServicePJ.VO.SignUpVO;
-
 @Mapper
 public interface signUpMapper {
-    public Integer userInfoCnt(String id);
-    public Integer authInfoCnt(Map<String, Object> data);
-    public void signUpAuthInsert(Map<String, Object> data);
-    public void signUpAuthUpdate(Map<String, Object> data);
+    public Integer userInfoCntData(String id);
+    public Integer authInfoCntData(Map<String, Object> data);
+    public Integer authYNInfoCntData(Map<String, Object> data);
+    public void signUpAuthInsertData(Map<String, Object> data);
+    public void signUpAuthUpData(Map<String, Object> data);
+    public void signUpInsertData(Map<String, Object> data);
 }

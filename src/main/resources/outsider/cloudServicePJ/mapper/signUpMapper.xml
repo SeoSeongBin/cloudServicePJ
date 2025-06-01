@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="outsider.cloudServicePJ.mapper.signUpMapper">
     <!-- <resultMap type="outsider.cloudServicePJ.VO.LoginVO" id="LoginResultMap"> -->
-    <select id="userInfoCnt" resultType="outsider.cloudServicePJ.VO.LoginVO">
+    <select id="userInfoCntData" resultType="java.lang.Integer">
         SELECT
             COUNT(*) AS CNT
         FROM
@@ -10,7 +10,7 @@
         WHERE
             UI_EMAIL = #{id}
     </select>
-    <select id="authInfoCnt" resultType="outsider.cloudServicePJ.VO.LoginVO">
+    <select id="authInfoCntData" resultType="java.lang.Integer">
         SELECT
             COUNT(*) AS CNT
         FROM
@@ -18,7 +18,7 @@
         WHERE
             UI_EMAIL = #{id}
     </select>
-    <insert id="signUpAuthInsert">
+    <insert id="signUpAuthInsertData">
         INSERT INTO USER_CERTIFICATION_EMAIL_LOG
         (
             UCEL_UI_EMAIL,
@@ -27,20 +27,46 @@
             UCEL_REG_DATE
         )
         VALUES(
-            #{email},
+            #{id},
             #{name},
             #{auth_code},
             now()
         );
     </insert>
-    <update id="signUpAuthUpdate">
+    <update id="signUpAuthUpData">
         UPDATE USER_CERTIFICATION_EMAIL_LOG
         SET
             UCEL_AUTH_YN = 'Y',
             UCEL_AUTH_DATE = now()
         WHERE
-            UCEL_UI_EMAIL = #{email},
-            UCEL_UI_NAME = #{name},
-            UCEL_AUTH_CODE = #{auth_code}
+            UCEL_UI_EMAIL = #{email}
+            <!-- UCEL_UI_NAME = #{name}, -->
+            AND UCEL_AUTH_CODE = #{auth_code}
     </update>
+    <select id="authYNInfoCntData" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*) AS CNT
+        FROM
+            USER_CERTIFICATION_EMAIL_LOG
+        WHERE
+            UCEL_UI_EMAIL = #{id}
+            AND UCEL_AUTH_YN = 'Y'
+    </select>
+    <insert id="signUpInsertData">
+        INSERT INTO USER_INFO
+        (
+            UI_BACK_SEAT_PHONE_NUM,
+            UI_NAME,
+            UI_EMAIL,
+            UI_JOIN_DT,
+            UI_PASSWORD
+        )
+        VALUES(
+            #{phone_num},
+            #{name},
+            #{id},
+            now(),
+            #{pw}
+        );
+    </insert>
 </mapper>

@@ -84,7 +84,6 @@
     /* login css end */
 
     /* sign_up css start */
-
     .sign_up_wrap{
         width: 40vw;
         min-width: 300px;
@@ -137,7 +136,8 @@
         width: 100%;
         font-size: 17px;
     }
-    .sign_up_area button.certification_btn {
+    .sign_up_area button.certification_btn,
+    .sign_up_area .sign_up_auth button {
         width: 150px;
         font-size: 14px;
         border: none;
@@ -152,5 +152,20 @@
         font-weight: bold;
         color: #ddd;
         background-color: #f4f4f4;
+    }
+    .sign_up_area button.sign_up_btn.on {
+        background-color: #4a97e7;
+        color: #fff;
+    }
+    .sign_up_area .sign_up_auth input{
+        width: calc(100% - 150px);
+        display: inline-block;
+    }
+
+    .sign_up_pw .red {
+        color: red;
+    }
+    .sign_up_pw .green {
+        color: green;
     }
     /* sign_up css end */
