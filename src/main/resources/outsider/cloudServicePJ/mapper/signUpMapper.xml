@@ -39,7 +39,7 @@
             UCEL_AUTH_YN = 'Y',
             UCEL_AUTH_DATE = now()
         WHERE
-            UCEL_UI_EMAIL = #{email}
+            UCEL_UI_EMAIL = #{id}
             <!-- UCEL_UI_NAME = #{name}, -->
             AND UCEL_AUTH_CODE = #{auth_code}
     </update>

@@ -22,6 +22,10 @@ function Sign_up() {
 
     // 인증코드 요청 로직
     const certificationFuntion = () => {
+        if(frontMail == "" && endMail == "") {
+            alert("이메일을 입력해주세요");
+            return;
+        }
         fetch("/signUpCertification", {
             method: "POST",
             headers: {
@@ -35,7 +39,7 @@ function Sign_up() {
         .then((res) => res.json())
         .then((data) => {
             console.log(data);
-            // alert(data.MSG);
+            alert(data.msg);
         })
         .catch((err) => {
             console.error("인증 메일 발송에 실패했습니다:", err);
@@ -56,7 +60,7 @@ function Sign_up() {
         })
         .then((res) => res.json())
         .then((data) => {
-            console.log(data);
+            alert(data.msg);
         })
         .catch((err) => {
             console.error("본인인증에 오류가 발생하였습니다. : ", err);
@@ -121,7 +125,7 @@ function Sign_up() {
         })
         .then((res) => res.json())
         .then((data) => {
-            console.log(data);
+            alert(data.msg);
         })
         .catch((err) => {
             console.error("본인인증에 오류가 발생하였습니다. : ", err);

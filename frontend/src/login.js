@@ -36,8 +36,8 @@ function Login() {
                 .then((res) => res.json())
                 .then((data) => {
                     console.log(data);
-                    if (data.msg == '' || data.msg == null) {
-                        alert("개발중입니다.");
+                    if (data.success == true) {
+                        navigate("/main")
                     } else {
                         alert(data.msg);
                     }

@@ -58,7 +58,7 @@ public class SignUpController {
                 signUpMapper.signUpAuthInsertData(data);
                 Transport.send(message);
     
-                result.put("msg", "메일전송이 완료회었습니다.");
+                result.put("msg", "인증메일을 발송하였습니다.");
             }
         }catch(Exception e){
             e.printStackTrace(); // 또는 로깅
