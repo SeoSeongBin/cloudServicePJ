@@ -38,7 +38,9 @@ function App() {
         <Route path="/sign_up" element={<Sign_up />} />
 
         {/* 메인 페이지 */}
-        <Route path="/main" element={<Main />} />
+        <Route path="/main" element={<Main />}>
+          
+        </Route>
       </Routes>
     </BrowserRouter>
   );

@@ -22,7 +22,14 @@ public class LoginController {
     @RequestMapping(value = "/loginFunction")
     public Map<String, Object> Login(@RequestParam String id, @RequestParam String pw, HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
-        LoginVO user = loginMapper.LoginFunction(id, pw);
+            
+            // 1. Map 객체 생성 및 파라미터 주입
+            Map<String, Object> loginParams = new HashMap<>();
+            loginParams.put("id", id);
+            loginParams.put("pw", pw);
+
+            // 2. Map을 인자로 전달
+            LoginVO user = loginMapper.LoginFunction(loginParams);
         String msg;
         try{
             if(user == null){

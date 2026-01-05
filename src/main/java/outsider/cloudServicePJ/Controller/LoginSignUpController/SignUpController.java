@@ -10,6 +10,7 @@ import jakarta.mail.internet.*;
 import outsider.cloudServicePJ.mapper.signUpMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,14 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class SignUpController {
     @Autowired
     private signUpMapper signUpMapper;
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @PostMapping(value = "/signUpCertification")
     public Map<String, Object> signUpCertification(@RequestBody Map<String, Object> data) throws MessagingException{
         Map<String, Object> result = new HashMap<>();
 
-        String hostMail = (String) data.get("id"); // 받는 사람 이메일 주소
-        String fromMail = "dhsb123@naver.com"; // 발신자 아이디 (이메일 앞부분)
-        String fromMailPw = "1q2w3e4r!#"; // 발신자 비밀번호
+        // 받는 사람 이메일 주소
+        String hostMail = (String) data.get("id"); 
+        // 발신자 아이디 (이메일 앞부분)
+        String fromMail = "dhsb123@naver.com"; 
+         // 발신자 비밀번호
+        String fromMailPw = "1q2w3e4r!#";
         try{
             // 등록된 계정인지 확인
             int cnt = signUpMapper.userInfoCntData(hostMail);
@@ -87,10 +92,18 @@ public class SignUpController {
         }
         return result;
     }
+    
     @PostMapping(value = "/signUpInsert")
     public Map<String, Object> signUpInsert(@RequestBody Map<String, Object> data) throws MessagingException{
         Map<String, Object> result = new HashMap<>();
         try{
+            // pw오브젝트를 가져와서 String으로 변경
+            String stringPw = data.get("pw").toString();
+            // string으로 만든 pw값을 암오화
+            String encodePw = passwordEncoder.encode(stringPw);
+            // 암호화된 pw값을 기존 pw값에 덮어 씌우기
+            data.put("pw", encodePw);
+            
             Integer cnt = signUpMapper.authYNInfoCntData(data);
             System.out.println("cnt : "+cnt);
             if(cnt < 0){
