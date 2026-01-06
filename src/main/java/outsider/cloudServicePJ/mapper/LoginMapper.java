@@ -8,4 +8,5 @@ import outsider.cloudServicePJ.VO.LoginVO;
 @Mapper
 public interface LoginMapper {
     public LoginVO LoginFunction(Map<String, Object> data);
+    public LoginVO LoginUserData(Map<String, Object> data);
 }

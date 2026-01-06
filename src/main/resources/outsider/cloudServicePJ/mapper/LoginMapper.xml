@@ -11,4 +11,16 @@
         WHERE
             UI_EMAIL = #{id}
     </select>
+
+    <select id="LoginUserData" resultType="outsider.cloudServicePJ.VO.LoginVO">
+        SELECT
+            UI_EMAIL,
+            UI_PASSWORD,
+            UI_NAME,
+            UI_BACK_SEAT_PHONE_NUM
+        FROM
+            USER_INFO
+        WHERE
+            UI_EMAIL = #{id}
+    </select>
 </mapper>
