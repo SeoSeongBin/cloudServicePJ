@@ -14,11 +14,28 @@
         SELECT
             COUNT(*) AS CNT
         FROM
-            USER_INFO
+            USER_CERTIFICATION_EMAIL_LOG
         WHERE
-            UI_EMAIL = #{id}
+            UCEL_UI_EMAIL = #{id}
     </select>
-    <insert id="signUpAuthInsertData">
+    <select id="authCodeCntData" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*) AS CNT
+        FROM
+            USER_CERTIFICATION_EMAIL_LOG
+        WHERE
+            UCEL_UI_EMAIL = #{id}
+            AND UCEL_AUTH_CODE = #{auth_code}
+            AND UCEL_AUTH_VALIDITY = 'Y'
+    </select>
+    <insert id="signUpAuthInsertData" parameterType="map">
+        UPDATE USER_CERTIFICATION_EMAIL_LOG
+        SET 
+            UCEL_AUTH_VALIDITY = 'N'
+        WHERE
+            UCEL_UI_EMAIL = #{id}
+            AND UCEL_AUTH_VALIDITY = 'Y';
+
         INSERT INTO USER_CERTIFICATION_EMAIL_LOG
         (
             UCEL_UI_EMAIL,
@@ -26,11 +43,12 @@
             UCEL_AUTH_CODE,
             UCEL_REG_DATE
         )
-        VALUES(
+        VALUES
+        (
             #{id},
             #{name},
             #{auth_code},
-            now()
+            NOW()
         );
     </insert>
     <update id="signUpAuthUpData">
@@ -40,7 +58,7 @@
             UCEL_AUTH_DATE = now()
         WHERE
             UCEL_UI_EMAIL = #{id}
-            <!-- UCEL_UI_NAME = #{name}, -->
+            AND UCEL_AUTH_VALIDITY = 'Y'
             AND UCEL_AUTH_CODE = #{auth_code}
     </update>
     <select id="authYNInfoCntData" resultType="java.lang.Integer">
@@ -51,6 +69,15 @@
         WHERE
             UCEL_UI_EMAIL = #{id}
             AND UCEL_AUTH_YN = 'Y'
+            AND UCEL_AUTH_VALIDITY = 'Y'
+    </select>
+    <select id="signUpChkPhoneNum" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*) AS CNT
+        FROM
+            USER_INFO
+        WHERE
+            UI_BACK_SEAT_PHONE_NUM = #{phone_num}
     </select>
     <insert id="signUpInsertData">
         INSERT INTO USER_INFO

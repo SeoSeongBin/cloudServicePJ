@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom"; // 상단에 추가
 
 function Sign_up() {
+    const navigate = useNavigate();
     // 메일 앞 @ 이전 
     let [frontMail, setFrontMail] = useState("");
     // 메일 뒤 @ 이후

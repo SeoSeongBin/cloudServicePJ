@@ -31,12 +31,12 @@ public class SignUpController {
         String fromMail = "dhsb123@naver.com"; 
          // 발신자 비밀번호
         String fromMailPw = "K2GQF34937NS";
-        System.out.println();
         try{
             // 등록된 계정인지 확인
             int cnt = signUpMapper.userInfoCntData(hostMail);
-    
-            if(cnt > 1){
+            System.out.println("cnt : "+ cnt+"@@@@@@@@@@@@@@@@@@@@@@@");
+            
+            if(cnt > 0){
                 result.put("msg", "이미 등록된 E-mail입니다.");
             }else{
                 String authCode = String.format("%06d", new Random().nextInt(999999));
@@ -66,9 +66,11 @@ public class SignUpController {
                 message.setFrom(new InternetAddress(fromMail)); // 보내는 사람
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(hostMail)); // 받는 사람
                 message.setSubject("인증 요청 메일입니다.");
-                message.setText("인증코드는: " + authCode);
+                message.setText("인증코드: " + authCode);
                 
+                // 테이블에 인증코드 insert
                 signUpMapper.signUpAuthInsertData(data);
+                // 메일 전송과 인증
                 Transport.send(message);
     
                 result.put("msg", "인증메일을 발송하였습니다.");
@@ -85,12 +87,21 @@ public class SignUpController {
     public Map<String, Object> signUpAuth(@RequestBody Map<String, Object> data) throws MessagingException{
         Map<String, Object> result = new HashMap<>();
         try{
+            // 인증 요청 내역이 있는지 확인
             int cnt = signUpMapper.authInfoCntData(data);
-            if(cnt < 0){
+            if(cnt == 0){
                 result.put("msg", "인증요청을 해주세요.");
             }else{
-                signUpMapper.signUpAuthUpData(data);
-                result.put("msg", "메일인증이 완료되었습니다.");
+                // 인증코드 일치 확인
+                int authCnt = signUpMapper.authCodeCntData(data);
+                // 인증코드 일치하지 않을 시
+                if(authCnt == 0){
+                    result.put("msg", "인증번호가 일치하지 않습니다.");
+                // 인증코드 일치 시
+                }else{
+                    signUpMapper.signUpAuthUpData(data);
+                    result.put("msg", "메일인증이 완료되었습니다.");
+                }
             }
             result.put("success", true);
         }catch(Exception e){
@@ -113,13 +124,19 @@ public class SignUpController {
             data.put("pw", encodePw);
             
             Integer cnt = signUpMapper.authYNInfoCntData(data);
-            System.out.println("cnt : "+cnt);
+            
             if(cnt < 0){
                 result.put("msg", "인증을 완료해주세요.");
             }else{
-                signUpMapper.signUpInsertData(data);
-                result.put("msg", "가입이 완료되었습니다.");
-                result.put("status", true);
+                Integer phoneNumCnt = signUpMapper.signUpChkPhoneNum(data);
+                
+                if(phoneNumCnt > 0){
+                    result.put("msg", "이미 가입되어있는 번호입니다.");
+                }else{
+                    signUpMapper.signUpInsertData(data);
+                    result.put("msg", "가입이 완료되었습니다.");
+                    result.put("status", true);
+                }
             }
             result.put("success", true);
         }catch(Exception e){

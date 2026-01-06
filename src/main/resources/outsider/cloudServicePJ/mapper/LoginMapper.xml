@@ -10,6 +10,5 @@
             USER_INFO
         WHERE
             UI_EMAIL = #{id}
-            AND UI_PASSWORD = #{pw}
     </select>
 </mapper>
