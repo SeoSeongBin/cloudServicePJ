@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react";
+import { useNavigate } from "react-router-dom"; // 상단에 추가
 
 function Sign_up() {
     // 메일 앞 @ 이전 
@@ -126,6 +127,10 @@ function Sign_up() {
         .then((res) => res.json())
         .then((data) => {
             alert(data.msg);
+
+            if(data.status == true){
+                navigate("/login");
+            }
         })
         .catch((err) => {
             console.error("본인인증에 오류가 발생하였습니다. : ", err);

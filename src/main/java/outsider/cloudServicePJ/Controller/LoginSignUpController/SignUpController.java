@@ -30,7 +30,8 @@ public class SignUpController {
         // 발신자 아이디 (이메일 앞부분)
         String fromMail = "dhsb123@naver.com"; 
          // 발신자 비밀번호
-        String fromMailPw = "1q2w3e4r!#";
+        String fromMailPw = "K2GQF34937NS";
+        System.out.println();
         try{
             // 등록된 계정인지 확인
             int cnt = signUpMapper.userInfoCntData(hostMail);
@@ -46,8 +47,15 @@ public class SignUpController {
                 props.put("mail.smtp.auth", "true");
                 props.put("mail.smtp.starttls.enable", "true");
                 props.put("mail.smtp.host", "smtp.naver.com");
-                props.put("mail.smtp.port", "587");
+                props.put("mail.smtp.port", "465");
     
+                // SSL을 사용하는 465 포트를 위한 필수 설정
+                props.put("mail.smtp.ssl.enable", "true"); 
+                props.put("mail.smtp.ssl.trust", "smtp.naver.com");
+                props.put("mail.smtp.socketFactory.port", "465");
+                props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+                props.put("mail.smtp.socketFactory.fallback", "false");
+
                 Session session = Session.getInstance(props, new Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(fromMail, fromMailPw);
@@ -111,6 +119,7 @@ public class SignUpController {
             }else{
                 signUpMapper.signUpInsertData(data);
                 result.put("msg", "가입이 완료되었습니다.");
+                result.put("status", true);
             }
             result.put("success", true);
         }catch(Exception e){
