@@ -15,13 +15,19 @@ function Login() {
                 method: 'GET',
                 credentials: 'include',
             })
+            .then(res => {
+                // 세션이 없으면(401) 아무것도 하지 않고 로그인 페이지에 머뭄
+                if (res.status === 401) return null;
+                return res.json();
+            })
             .then(data => {
-                if(data){
-                    // 로그인 정보가 존재할 경우 유저명 세팅
+                // 데이터가 있고, 그 안에 유저 정보(userInfo 등)가 확실히 있을 때만 이동
+                if (data && data.userInfo) {
                     navigate("/main");
                 }
-            });
-        }, []);
+            })
+            .catch(err => console.error("체크 실패:", err));
+        }, [navigate]);
 
         // 로그인 클릭 작동
         const loginBtnFuntion = () => {
