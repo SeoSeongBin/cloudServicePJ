@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import './App.css';
 import Login from './login';
-import Sign_up from './sign_up';
+import Sign_up from './SignUp';
 import Main from './main';
 
 // 로그인 체크 및 라우팅 처리 담당 컴포넌트

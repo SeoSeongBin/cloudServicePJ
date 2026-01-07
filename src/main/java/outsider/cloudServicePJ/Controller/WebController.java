@@ -9,7 +9,6 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,7 +19,7 @@ import outsider.cloudServicePJ.mapper.LoginMapper;
 @Controller
 public class WebController {
     @Autowired
-    private LoginMapper loginMapper; // 1. 여기서 선언한 이름을 확인하세요!
+    private LoginMapper loginMapper;
 
     @RequestMapping(value = {"/{path:[^\\.]*}", "/**/{path:[^\\.]*}"})
     public String redirect() {
@@ -75,6 +74,27 @@ public class WebController {
             result.put("userInfo", detailData);
             result.put("user", user);
         }
+        return result;
+    }
+
+    @RequestMapping("/api/logout")
+    @ResponseBody
+    public Map<String, Object> offSession(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>();
+        // 기존 세션 변수화
+        HttpSession session = request.getSession(false);
+
+        if (session != null) {
+            // 세션에 담긴 모든 데이터 삭제 및 세션 무효화
+            session.invalidate(); 
+            System.out.println("=== 세션 삭제 ===");
+            result.put("status", "success");
+            result.put("message", "로그아웃 되었습니다.");
+        } else {
+            result.put("status", "fail");
+            result.put("message", "삭제할 세션이 없습니다.");
+        }
+
         return result;
     }
 

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page 마크업</title>
+</head>
+<script>
+    document.addEventListener('DOMContentLoaded', function(e) {
+        const userInfoBox = document.querySelector(".header_ui_select_wrap");
+        document.querySelector(".user_info_wrap").addEventListener("click", function(e) {
+            const icon = this.querySelector("i");
+ 
+            if (icon.classList.contains("fa-angle-down")) {
+                icon.classList.replace("fa-angle-down", "fa-angle-up");
+                userInfoBox.classList.remove("dn");
+            } else {
+                icon.classList.replace("fa-angle-up", "fa-angle-down");
+                userInfoBox.classList.add("dn");
+            }
+        });
+
+        let menu = document.querySelectorAll(".menu")
+
+        menu.forEach(ele => {
+            ele.addEventListener("click", function(){
+                menu.forEach(eleMenu => eleMenu.classList.remove("on"));
+
+                this.classList.add("on");
+            })
+        });
+    })
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="./reset.css">
+<style>
+    header {
+        display: flex;
+        align-items: center; /* 세로 중앙 정렬 */
+        gap: 20px; /* 요소 사이 간격 (선택사항) */
+        border-bottom: 1px solid #ddd;
+        box-shadow: -1px -1px 6px 2px rgba(0,0,0,0.18);
+        -webkit-box-shadow: -1px -1px 6px 2px rgba(0,0,0,0.18);
+        -moz-box-shadow: -1px -1px 6px 2px rgba(0,0,0,0.18);
+        position: relative;
+        z-index: 1;
+    }
+
+    header > * {
+        padding: 10px;
+    }
+
+    /* 두 번째 자식 요소만 공간을 다 차지하도록 설정 */
+    header > *:nth-child(2) {
+        flex: 1; /* flex-grow: 1, flex-shrink: 1, flex-basis: 0% 의 축약형 */
+    }
+
+    header .header_left {
+        
+    }
+
+    header .header_left h1.logo {
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .header_user_ui_wrap {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .header_ui_select_wrap {
+        position: absolute;
+        top: 24px;
+        right: 2px;
+        border: 1px solid #ddd;
+        width: 100px;
+        overflow: hidden;
+        border-radius: 10px;
+        background-color: #fff;
+    }
+    .header_ui_select_wrap p {
+        display: inline-flex; /* p 태그 자체도 콘텐츠만큼만 너비를 가짐 */
+        align-items: center;  /* 수직 중앙 정렬 */
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+        padding: 10px;
+        vertical-align: middle;
+    }
+    .header_ui_select_wrap p > * {
+        flex: 1;
+    }
+    .header_ui_select_wrap p:last-child {
+        border: none;
+    }
+
+    .header_ui_select_wrap p:hover{
+        background-color: rgb(83, 83, 238);
+        color: #fff;
+    }
+
+    .header_ui_select_wrap span{
+        display: flex;
+        /* align-items: center; */
+        justify-content: center;
+        /* width를 주지 않으면 아이콘 크기에 딱 맞게 조절됩니다. */
+    }
+
+    /* 나머지 요소들은 자기 크기만큼만 가짐 (기본값) */
+    header > *:not(:nth-child(2)) {
+        flex: none; /* 크기가 변하지 않도록 고정 */
+    }
+
+    #navi {
+        position: relative;
+        width: 200px;
+        height: calc(100dvh - 45px);
+        /* border-right: 1px solid #ddd; */
+        background-color: #f6f6f6;
+    }
+    #navi .naviTit {
+        font-size: 18px;
+        text-align: center;
+        padding: 10px 20px;
+        font-weight: bold;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #navi p {
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    #navi p:hover {
+        background-color: rgba(83, 83, 238, 0.7);
+        color: #fff;
+        font-weight: bold;
+    }
+    #navi p.on {
+        background-color: rgb(83, 83, 238);
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .dn{
+        display: none;
+    }
+</style>
+<body>
+    <!-- 혜더영역 마크업 -->
+    <header>
+        <div class="header_left">
+            <h1 class="logo">Cloude Project</h1>
+        </div>
+        <div class="header_center"></div>
+        <div class="header_right">
+            <div class="header_user_ui_wrap">
+                <p class="user_info_wrap">유저명 <span><i class="fa-solid fa-angle-down"></i></span></p>
+                <div class="header_ui_select_wrap dn">
+                    <p>회원정보 <span><i class="fa-solid fa-circle-user"></i></span></p>
+                    <p>로그아웃 <span><i class="fa-solid fa-right-from-bracket"></i></span></p>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- 사이드 navi 마크업 -->
+    <div id="navi">
+        <div class="navi_active_btn"></div>
+        <h2 class="naviTit">Menu List</h2>
+        <p class="menu on">My Cloude</p>
+        <p class="menu">Graph</p>
+    </div>
+</body>
+</html>

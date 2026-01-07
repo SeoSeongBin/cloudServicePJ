@@ -1,12 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 function Login() {
+
         let [idFocused, setIdFocused] = useState(false);
         let [pwFocused, setPwFocused] = useState(false);
         let [idVal, setId] = useState("");
         let [pwVal, setPw] = useState("");
         let msg = "";
         let navigate = useNavigate();
+
+        // 로그인 세션 체크
+        useEffect(() => {
+            fetch('/api/getSessionUser', {
+                method: 'GET',
+                credentials: 'include',
+            })
+            .then(data => {
+                if(data){
+                    // 로그인 정보가 존재할 경우 유저명 세팅
+                    navigate("/main");
+                }
+            });
+        }, []);
 
         // 로그인 클릭 작동
         const loginBtnFuntion = () => {

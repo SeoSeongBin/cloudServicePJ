@@ -169,3 +169,121 @@
         color: green;
     }
     /* sign_up css end */
+
+    /* header css start */
+    #header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        border-bottom: 1px solid #ddd;
+        box-shadow: -1px -1px 6px 2px rgba(0,0,0,0.18);
+        -webkit-box-shadow: -1px -1px 6px 2px rgba(0,0,0,0.18);
+        -moz-box-shadow: -1px -1px 6px 2px rgba(0,0,0,0.18);
+        position: relative;
+        z-index: 1;
+    }
+
+    #header > * {
+        padding: 10px;
+    }
+
+    /* 두 번째 자식 요소만 공간을 다 차지하도록 설정 */
+    #header > *:nth-child(2) {
+        flex: 1;
+    }
+
+    #header .header_left {
+        
+    }
+
+    #header .header_left h1.logo {
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .header_user_ui_wrap {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .header_ui_select_wrap {
+        position: absolute;
+        top: 24px;
+        right: 2px;
+        border: 1px solid #ddd;
+        width: 100px;
+        overflow: hidden;
+        border-radius: 10px;
+        background-color: #fff;
+    }
+    .header_ui_select_wrap p {
+        display: inline-flex;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+        padding: 10px;
+        vertical-align: middle;
+    }
+    .header_ui_select_wrap p > * {
+        flex: 1;
+    }
+    .header_ui_select_wrap p:last-child {
+        border: none;
+    }
+
+    .header_ui_select_wrap p:hover{
+        background-color: rgb(83, 83, 238);
+        color: #fff;
+    }
+
+    .header_ui_select_wrap span{
+        display: flex;
+        /* align-items: center; */
+        justify-content: center;
+        /* width를 주지 않으면 아이콘 크기에 딱 맞게 조절됩니다. */
+    }
+
+    /* 나머지 요소들은 자기 크기만큼만 가짐 (기본값) */
+    #header > *:not(:nth-child(2)) {
+        flex: none; /* 크기가 변하지 않도록 고정 */
+    }
+
+    .dn{
+        display: none;
+    }
+    /* header css end */
+
+    /* navi css start */
+    #navi {
+        position: relative;
+        width: 200px;
+        height: calc(100dvh - 45px);
+        /* border-right: 1px solid #ddd; */
+        background-color: #f6f6f6;
+    }
+    #navi .naviTit {
+        font-size: 18px;
+        text-align: center;
+        padding: 10px 20px;
+        font-weight: bold;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #navi p {
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    #navi p:hover {
+        background-color: rgba(83, 83, 238, 0.7);
+        color: #fff;
+        font-weight: bold;
+    }
+    #navi p.on {
+        background-color: rgb(83, 83, 238);
+        color: #fff;
+        font-weight: bold;
+    }
+    /* navi css end */
