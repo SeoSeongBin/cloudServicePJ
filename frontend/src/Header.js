@@ -1,5 +1,5 @@
 import React, {useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // 필요한 것만 import
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleUp, faCircleUser, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
@@ -15,7 +15,6 @@ export default function Header() {
     };
 
     // 세션정보 가져오기
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         fetch('/api/getSessionUser', {
             method: 'GET',

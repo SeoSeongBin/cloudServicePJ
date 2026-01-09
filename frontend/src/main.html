@@ -116,8 +116,9 @@
         position: relative;
         width: 200px;
         height: calc(100dvh - 45px);
-        /* border-right: 1px solid #ddd; */
         background-color: #f6f6f6;
+        vertical-align: top;
+        display: inline-block;
     }
     #navi .naviTit {
         font-size: 18px;
@@ -142,6 +143,88 @@
         background-color: rgb(83, 83, 238);
         color: #fff;
         font-weight: bold;
+    }
+
+    #contents {
+        box-sizing: border-box;
+        display: inline-block;
+        vertical-align: top;
+        width: calc(100% - 245px);
+        padding-top: 20px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    #contents .content_header {
+        display: flex;
+        margin-bottom: 20px;
+    }
+    #contents .content_header .content_tit {
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    #contents .content_btn_area {
+        display: flex;
+        gap: 5px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 20px;
+        margin-bottom: 10px;
+    }
+
+    #contents .content_btn_area .btn {
+        padding: 5px 10px;
+        border: 1px solid #aaa;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        color: #222;
+    }
+
+    #contents .content_btn_area .btn.file_upload_btn {
+        border: 1px solid rgb(64, 118, 255);
+        background-color: rgb(64, 118, 255);
+        color: #fff;
+    }
+    #contents .content_btn_area .btn.file_delete_btn {
+        border: 1px solid rgb(230, 26, 63);
+        color: rgb(230, 26, 63);
+        padding: 5px;
+        transition: 0.4s;
+    }
+    #contents .content_btn_area .btn.file_delete_btn:hover {
+        border: 1px solid rgb(230, 26, 63);
+        background-color: rgb(230, 26, 63);
+        color: #fff;
+        padding: 5px;
+    }
+
+    #contents .content_btn_area .btn.all_chk_btn.on {
+        border: 1px solid rgb(64, 118, 255);
+        background-color: rgb(64, 118, 255);
+        color: #fff;
+    }
+
+    #contents .file_wrap {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    #contents .file_wrap .file{
+        width: 130px;
+        height: 130px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    #contents .file_wrap .file:hover {
+        background-color: #d5e0ff7e;
+    }
+
+    #contents .file_wrap .file.on {
+        border: 1px solid rgb(137, 170, 255);
+        background-color: #d5e0ff7e;
     }
 
     .dn{
@@ -184,7 +267,26 @@
         </div>
         
         <div class="content_btn_area">
-            
+            <div class="btn all_chk_btn">전체선택 <i class="fa-solid fa-square-check"></i><i class="fa-regular fa-square"></i></div>
+            <div class="btn file_upload_btn">업로드 <i class="fa-solid fa-upload"></i></div>
+            <div class="btn file_delete_btn"><i class="fa-solid fa-trash-can"></i></div>
+        </div>
+
+        <div class="file_wrap">
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
+            <div class="file"></div>
         </div>
     </div>
 </body>
