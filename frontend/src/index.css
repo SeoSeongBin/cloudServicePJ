@@ -294,7 +294,7 @@
         box-sizing: border-box;
         display: inline-block;
         vertical-align: top;
-        width: calc(100% - 245px);
+        width: calc(100% - 200px);
         padding-top: 20px;
         padding-left: 20px;
         padding-right: 20px;
@@ -350,10 +350,33 @@
         color: #fff;
     }
 
+    #contents .content_btn_area .btn.file_new_folder_btn {
+        /* border: 1px solid #eee;
+        color: #333;
+        background-color: #eee; */
+        /* transition: 0.1s; */
+    }
+    #contents .content_btn_area .btn.file_new_folder_btn:hover {
+        border: 1px solid #ddd;
+        background-color: #ddd;
+    }
+
     #contents .file_wrap {
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
+        height: calc(100dvh - 173px);
+        overflow-y: auto;
+    }
+    #contents .file_wrap::-webkit-scrollbar {
+        width: 3px;  /* 세로축 스크롤바 폭 너비 */
+        height: 10px;  /* 가로축 스크롤바 폭 너비 */
+        background-color: #ddd;
+    }
+    #contents .file_wrap::-webkit-scrollbar-thumb{
+        background: #4076ff;
+        border: 2px solid #4076ff;
+        border-radius: 12px 12px 12px 12px;
     }
 
     #contents .file_wrap .file{
@@ -372,3 +395,157 @@
         background-color: #d5e0ff7e;
     }
     /* content css end */
+
+    /* file upload popup start */
+        .upload_waiting_area {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        /* padding: 10px; */
+        border-radius: 10px;
+        height: 400px;
+        width: 300px;
+        box-shadow: 2px 2px 20px 0px rgba(0,0,0,0.2);
+        -webkit-box-shadow: 2px 2px 20px 0px rgba(0,0,0,0.2);
+        -moz-box-shadow: 2px 2px 20px 0px rgba(0,0,0,0.2);
+        overflow: hidden;
+        background-color: #fff;
+    }
+
+    .upload_waiting_area .waiting_header{
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .upload_waiting_area .waiting_header h2 {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        position: relative;
+    }
+    .upload_waiting_area .waiting_header h2 span {
+        font-size: 13px;
+        margin-bottom: 10px;
+        font-weight: normal;
+    }
+
+    .upload_waiting_area .waiting_header .waiting_file_progress_bar {
+        width: 100%;
+        height: 5px;
+        background-color: #ddd;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+
+    .upload_waiting_area .waiting_header .waiting_file_progress_bar .waiting_file_gager {
+        height: 100%;
+        width: 10%;
+        background-color: rgb(64, 118, 255);
+    }
+
+    .upload_waiting_area .waiting_list {
+        height: calc(100% - 104px);
+        border-bottom: 1px solid #eee;
+        overflow-y: auto;
+    }
+
+    .upload_waiting_area .waiting_list::-webkit-scrollbar {
+        width: 3px;  /* 세로축 스크롤바 폭 너비 */
+        height: 10px;  /* 가로축 스크롤바 폭 너비 */
+        background-color: #ddd;
+    }
+
+    .upload_waiting_area .waiting_list::-webkit-scrollbar-thumb {
+        background: rgb(64, 118, 255); /* 스크롤바 막대 색상 */
+        border: 2px solid rgb(64, 118, 255); /* 스크롤바 막대 테두리 설정  */
+        border-radius: 12px 12px 12px 12px;
+    }
+
+    .upload_waiting_area .waiting_list .waiting_file {
+        display: flex;
+        align-items: center;
+        padding: 10px 5px;
+    }
+
+    .upload_waiting_area .waiting_list .waiting_file:hover {
+        background-color: #d1d1d16b;
+    }
+
+    .upload_waiting_area .waiting_list .waiting_file .file_icon {
+        flex: 1;
+        text-align: center;
+        font-size: 25px;
+        color: #f3c728;
+    }
+    .upload_waiting_area .waiting_list .waiting_file .file_info {
+        flex: 5;
+    }
+    .upload_waiting_area .waiting_list .waiting_file .file_info .file_name {
+        font-size: 14px;
+        margin-bottom: 3px;
+        
+    }
+    .upload_waiting_area .waiting_list .waiting_file .file_info .file_size {
+        font-size: 12px;
+    }
+    .upload_waiting_area .waiting_list .waiting_file .waiting_file_status {
+        flex: 1;
+        text-align: center;
+        font-size: 18px;
+    }
+
+    .upload_waiting_area .waiting_list .waiting_file .waiting_file_status .fa-circle-pause {
+        color: #333;
+    }
+    .upload_waiting_area .waiting_list .waiting_file .waiting_file_status .fa-arrows-rotate {
+        color: #333;
+        animation: rotate_image 5s linear infinite;
+    }
+    @keyframes rotate_image{
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .upload_waiting_area .waiting_list .waiting_file .waiting_file_status .fa-circle-check {
+        color: rgb(0, 167, 14);
+    }
+
+    .upload_waiting_area .upload_waiting_btn_area {
+        display: flex;
+    }
+    .upload_waiting_area .upload_waiting_btn_area .btn {
+        display: inline-block;
+        flex: 1;
+        height: 100%;
+        padding: 12px 0;
+        justify-items: center;
+        align-items: center;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .upload_waiting_area .upload_waiting_btn_area .btn.start_upload_btn {
+        background-color: rgb(0, 229, 19);
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .upload_show_btn {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        width: 20px;
+        height: 20px;
+        background-color: rgba(64, 118, 255, 0.5);
+        padding: 5px;
+        border-radius: 50px;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .upload_waiting_area .fa-xmark {
+        float: right;
+        cursor: pointer;
+    }
+    /* file upload popup end */

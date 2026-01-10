@@ -227,15 +227,171 @@
         background-color: #d5e0ff7e;
     }
 
+    .upload_waiting_area {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        /* padding: 10px; */
+        border-radius: 10px;
+        height: 400px;
+        width: 300px;
+        box-shadow: 2px 2px 20px 0px rgba(0,0,0,0.2);
+        -webkit-box-shadow: 2px 2px 20px 0px rgba(0,0,0,0.2);
+        -moz-box-shadow: 2px 2px 20px 0px rgba(0,0,0,0.2);
+        overflow: hidden;
+        background-color: #fff;
+    }
+
+    .upload_waiting_area .waiting_header{
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .upload_waiting_area .waiting_header h2 {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        position: relative;
+    }
+    .upload_waiting_area .waiting_header h2 span {
+        font-size: 13px;
+        margin-bottom: 10px;
+        font-weight: normal;
+    }
+
+    .upload_waiting_area .waiting_header .waiting_file_progress_bar {
+        width: 100%;
+        height: 5px;
+        background-color: #ddd;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+
+    .upload_waiting_area .waiting_header .waiting_file_progress_bar .waiting_file_gager {
+        height: 100%;
+        width: 10%;
+        background-color: rgb(64, 118, 255);
+    }
+
+    .upload_waiting_area .waiting_list {
+        height: calc(100% - 104px);
+        border-bottom: 1px solid #eee;
+        overflow-y: auto;
+    }
+
+    .upload_waiting_area .waiting_list::-webkit-scrollbar {
+        width: 3px;  /* 세로축 스크롤바 폭 너비 */
+        height: 10px;  /* 가로축 스크롤바 폭 너비 */
+        background-color: #ddd;
+    }
+
+    .upload_waiting_area .waiting_list::-webkit-scrollbar-thumb {
+        background: rgb(64, 118, 255); /* 스크롤바 막대 색상 */
+        border: 2px solid rgb(64, 118, 255); /* 스크롤바 막대 테두리 설정  */
+        border-radius: 12px 12px 12px 12px;
+    }
+
+    .upload_waiting_area .waiting_list .waiting_file {
+        display: flex;
+        align-items: center;
+        padding: 10px 5px;
+    }
+
+    .upload_waiting_area .waiting_list .waiting_file:hover {
+        background-color: #d1d1d16b;
+    }
+
+    .upload_waiting_area .waiting_list .waiting_file .file_icon {
+        flex: 1;
+        text-align: center;
+        font-size: 25px;
+        color: #f3c728;
+    }
+    .upload_waiting_area .waiting_list .waiting_file .file_info {
+        flex: 5;
+    }
+    .upload_waiting_area .waiting_list .waiting_file .file_info .file_name {
+        font-size: 14px;
+        margin-bottom: 3px;
+        line-height: 18px;
+    }
+    .upload_waiting_area .waiting_list .waiting_file .file_info .file_size {
+        font-size: 12px;
+    }
+    .upload_waiting_area .waiting_list .waiting_file .waiting_file_status {
+        flex: 1;
+        text-align: center;
+        font-size: 18px;
+    }
+
+    .upload_waiting_area .waiting_list .waiting_file .waiting_file_status .fa-circle-pause {
+        color: #333;
+    }
+    .upload_waiting_area .waiting_list .waiting_file .waiting_file_status .fa-arrows-rotate {
+        color: #333;
+        animation: rotate_image 5s linear infinite;
+    }
+    @keyframes rotate_image{
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .upload_waiting_area .waiting_list .waiting_file .waiting_file_status .fa-circle-check {
+        color: rgb(0, 167, 14);
+    }
+
+    .upload_waiting_area .upload_waiting_btn_area {
+        display: flex;
+    }
+    .upload_waiting_area .upload_waiting_btn_area .btn {
+        display: inline-block;
+        flex: 1;
+        height: 100%;
+        padding: 12px 0;
+        justify-items: center;
+        align-items: center;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .upload_waiting_area .upload_waiting_btn_area .btn.start_upload_btn {
+        background-color: rgb(0, 229, 19);
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .upload_show_btn {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        width: 20px;
+        height: 20px;
+        background-color: rgba(64, 118, 255, 0.5);
+        padding: 5px;
+        border-radius: 50px;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .upload_show_btn:hover {
+        background-color: rgba(64, 118, 255, 1);
+    }
+
     .dn{
         display: none;
+    }
+
+    .fa-xmark {
+        float: right;
+        cursor: pointer;
     }
 </style>
 <body>
     <!-- 혜더영역 마크업 -->
     <header>
         <div class="header_left">
-            <h1 class="logo">Cloude Project</h1>
+            <h1 class="logo">Cloud Project</h1>
         </div>
         <div class="header_center"></div>
         <div class="header_right">
@@ -252,14 +408,14 @@
     <div id="navi">
         <div class="navi_active_btn"></div>
         <h2 class="naviTit">Menu List</h2>
-        <p class="menu on">My Cloude</p>
+        <p class="menu on">My Cloud</p>
         <p class="menu">Graph</p>
     </div>
 
     <div id="contents">
         <div class="content_header">
             <div class="content_header_left">
-                <h2 class="content_tit">My Cloude</h2>
+                <h2 class="content_tit">My Cloud</h2>
             </div>
             <div class="content_header_right">
                 
@@ -270,6 +426,42 @@
             <div class="btn all_chk_btn">전체선택 <i class="fa-solid fa-square-check"></i><i class="fa-regular fa-square"></i></div>
             <div class="btn file_upload_btn">업로드 <i class="fa-solid fa-upload"></i></div>
             <div class="btn file_delete_btn"><i class="fa-solid fa-trash-can"></i></div>
+        </div>
+
+        <div class="upload_show_btn">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+        </div>
+
+        <div class="upload_waiting_area">
+            <div class="waiting_header">
+                <h2>업로드 <span>( / 개 완료 )</span> <i class="fa-solid fa-xmark"></i></h2>
+                <div class="waiting_file_progress_bar">
+                    <div class="waiting_file_gager"></div>
+                </div>
+            </div>
+            <div class="waiting_list">
+                <div class="waiting_file">
+                    <div class="file_icon">
+                        <i class="fa-solid fa-file"></i>
+                    </div>
+                    <div class="file_info">
+                        <p class="file_name">파일명파일명파일명파일명파일명파일명파일명.확장자</p>
+                        <p class="file_size">24 mb</p>
+                    </div>
+                    <div class="waiting_file_status">
+                        <!-- 대기상태 아이콘 -->
+                        <i class="fa-solid fa-circle-pause"></i>
+                        <!-- 완료 아이콘 -->
+                        <!-- <i class="fa-solid fa-circle-check"></i> -->
+                        <!-- 업로드 진행중 아이콘 -->
+                        <!-- <i class="fa-solid fa-arrows-rotate"></i> -->
+                    </div>
+                </div>
+            </div>
+            <div class="upload_waiting_btn_area">
+                <div class="btn start_upload_btn">시작</div>
+                <div class="btn stop_upload_btn">일시정지</div>
+            </div>
         </div>
 
         <div class="file_wrap">

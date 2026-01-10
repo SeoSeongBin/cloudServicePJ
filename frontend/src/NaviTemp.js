@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 export default function Navi() {
     const menuTitName = "Menu List"
     const [activeIndex, setActiveIndex] = useState(0);
-    const menuList = ["My Cloude", "Graph"];
+    const menuList = ["My Cloud", "Graph"];
 
     return (
             <div id="navi">

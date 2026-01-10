@@ -59,7 +59,7 @@ export default function Header() {
     return (
         <div id="header">
             <div className="header_left">
-                <h1 className="logo">Cloude Project</h1>
+                <h1 className="logo">Cloud Project</h1>
             </div>
             <div className="header_center"></div>
             <div className="header_right">
