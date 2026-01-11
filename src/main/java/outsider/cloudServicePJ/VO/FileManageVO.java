@@ -10,4 +10,6 @@ public class FileManageVO {
     private String FM_FILE_PATH;
     private Integer FM_FILE_SIZE;
     private String FM_FILE_EXTENSION_TYPE;
+    private String FM_FILE_TYPE;
+	private Integer FM_UP_FILE_ID;
 }

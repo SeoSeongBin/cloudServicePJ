@@ -1,21 +1,45 @@
 import react, {useState, useRef} from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSquareCheck, faUpload, faTrashCan, faFileZipper, faTimes, faFile, faCirclePause, faArrowUpFromBracket,faFileCode,faFileImage, faFilePdf,faFilePowerpoint,faFileCsv,faFileWord } from '@fortawesome/free-solid-svg-icons';
+import { faSquareCheck, faUpload, faTrashCan, faFileZipper, faTimes, faFile, faCirclePause, faArrowUpFromBracket,faFileCode,faFileImage, faFilePdf,faFilePowerpoint,faFileCsv,faFileWord, faFolder } from '@fortawesome/free-solid-svg-icons';
 import { faSquare } from '@fortawesome/free-regular-svg-icons';
 
 export default function Content() {
     let [uploadShowHide, uploadShowHideStat] = useState(false);
     let [chkStatus, chkstatus] = useState(false);
     let [uploadQueue, setUploadQueue] = useState([]);
+    let [newNamePop, newNamePopSata] = useState(false);
     let fileInputRef = useRef(null);
+    let [namePopTit, setNamePopTit] = useState("");
+    let [fileName, setFileName] = useState('');
+    let [itemList, setItemList] = useState([]);
 
     let toggleAllSelect = () => {
         chkstatus(!chkStatus);
+
+        if(chkStatus === true){
+
+        }
     };
+
+    // 새폴더
+    let toggleNamePop = () => {
+        newNamePopSata(!newNamePop);
+        setNamePopTit("새 폴더");
+    }
+    // 이름바꾸기
+    let toggleNamePop2 = () => {
+        newNamePopSata(!newNamePop);
+        setNamePopTit("이름 바꾸기");
+    }
 
     let toggleUploadPopShowHide = () => {
         uploadShowHideStat(!uploadShowHide);
     };
+
+    // 파일명 input 변경시 마다 적용
+    let fileNameChange = (e) => {
+        setFileName(e.target.value);
+    }
 
     // 파일 선택창 열기
     const handleUploadClick = () => {
@@ -90,12 +114,44 @@ export default function Content() {
         }
     };
 
-    const newFolder = () => {
+    const namePopSaveBtn = () => {
+        if(namePopTit == "새 폴더"){
+            if (fileName.trim() === "") {
+                alert("이름을 입력해주세요.");
+                return;
+            }
+            // 고유 ID (삭제나 수정 시 필요)
+            const newItem = {
+                id: Date.now(), 
+                name: fileName,
+                type: 'folder'
+            };
 
+            setItemList((prev) => [...prev, newItem]);
+            
+            // 입력창 비우고 팝업 닫기
+            setFileName('');
+            newNamePopSata(false);
+        }else{
+
+        }
     }
     
     return(
         <div id="contents">
+
+            <div className={`name_popup_wrap ${newNamePop ? "" : "dn"}`}>
+                <div className="pop_bac"></div>
+                <div className="name_pop_content">
+                    <h3>{namePopTit} <FontAwesomeIcon icon={faTimes} onClick={toggleNamePop} /></h3>
+                    <input className="file_name_input" type="text" placeholder="이름을 입력해주세요" onChange={fileNameChange} value={fileName} />
+                    <div className="name_pop_btn_area">
+                        <div className="save_btn" onClick={namePopSaveBtn}>확인</div>
+                        <div className="close_btn" onClick={toggleNamePop}>닫기</div>
+                    </div>
+                </div>
+            </div>
+
             <input 
                 type="file" 
                 multiple 
@@ -114,7 +170,7 @@ export default function Content() {
             
             <div className="content_btn_area">
                 <div className={`btn all_chk_btn ${chkStatus ? "on" : ""}`} onClick={toggleAllSelect}>전체선택 <FontAwesomeIcon icon={chkStatus ? faSquareCheck : faSquare} /></div>
-                <div className="btn file_new_folder_btn" onClick={newFolder}>새 폴더</div>
+                <div className="btn file_new_folder_btn" onClick={toggleNamePop}>새 폴더</div>
                 <div className="btn file_upload_btn" onClick={handleUploadClick}>업로드 <FontAwesomeIcon icon={faUpload} /></div>
                 <div className="btn file_delete_btn"><FontAwesomeIcon icon={faTrashCan} /></div>
             </div>
@@ -178,13 +234,21 @@ export default function Content() {
                         <div className="btn stop_upload_btn">일시정지</div>
                     </div>
                 </div>
+                
 
             <div className="file_wrap"
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
-                {/* <div className="file"></div> */}
+                {itemList.map((item) => (
+                    <div className="file" key={item.id}>
+                        {/* 아이콘과 이름을 렌더링 */}
+                        <FontAwesomeIcon icon={faFolder} />
+                        <span className="file_name">{item.name}</span>
+                    </div>
+                ))}
             </div>
+            
         </div>
     )
 }

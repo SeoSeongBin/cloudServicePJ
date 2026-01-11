@@ -4,4 +4,28 @@
     <!-- <resultMap type="outsider.cloudServicePJ.VO.LoginVO" id="LoginResultMap"> -->
     <select id="fileListData" resultType="outsider.cloudServicePJ.VO.FileManageVO">
     </select>
+    <insert id="fileUploadData">
+        INSERT INTO	FILE_MANAGE
+        (
+            FM_UI_USER_EMAIL,
+            FM_FILE_NAME,
+            FM_FILE_PATH,
+            FM_FILE_SIZE,
+            FM_FILE_EXTENSION_TYPE,
+            FM_FILE_TYPE,
+            FM_UP_FILE_ID,
+            FM_REG_DATE
+        )
+        VALUES(
+            #{fm_ui_user_email},
+            #{fm_file_name},
+            #{fm_file_path},
+            #{fm_file_size},
+            #{fm_file_extension_type},
+            #{fm_file_type},
+            #{fm_up_file_id},
+            NOW()
+        );
+    </insert>
+
 </mapper>

@@ -312,9 +312,7 @@
     #contents .content_btn_area {
         display: flex;
         gap: 5px;
-        border-bottom: 1px solid #ddd;
         padding-bottom: 20px;
-        margin-bottom: 10px;
     }
 
     #contents .content_btn_area .btn {
@@ -367,6 +365,8 @@
         flex-wrap: wrap;
         height: calc(100dvh - 173px);
         overflow-y: auto;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
     }
     #contents .file_wrap::-webkit-scrollbar {
         width: 3px;  /* 세로축 스크롤바 폭 너비 */
@@ -386,6 +386,25 @@
         border-radius: 5px;
     }
 
+    #contents .file_wrap .file svg {
+        color: #f3c728;
+        display: block;
+        font-size: 56px;
+        padding: 25px 0;
+        width: 100%;
+    }
+
+    #contents .file_wrap .file .file_name {
+        display: block;
+        text-align: center;
+        font-size: 14px;
+        width: 120px;            /* 너비를 120px로 고정 */
+        white-space: nowrap;     /* 텍스트가 줄바꿈되지 않도록 설정 */
+        overflow: hidden;        /* 영역을 벗어나는 텍스트 숨김 */
+        text-overflow: ellipsis; /* 벗어나는 부분에 ... 표시 */
+        margin: 0 auto;          /* 가운대 정렬을 유지하기 위해 추가 */
+    }
+
     #contents .file_wrap .file:hover {
         background-color: #d5e0ff7e;
     }
@@ -394,6 +413,7 @@
         border: 1px solid rgb(137, 170, 255);
         background-color: #d5e0ff7e;
     }
+
     /* content css end */
 
     /* file upload popup start */
@@ -549,3 +569,72 @@
         cursor: pointer;
     }
     /* file upload popup end */
+    /* name popup css start */
+        .name_popup_wrap {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 1;
+    }
+
+    .name_popup_wrap .pop_bac {
+        width: 100%;
+        height: 100%;
+        background-color: #00000043;
+    }
+
+    .name_popup_wrap .name_pop_content {
+        width: 300px;
+        /* height: 200px; */
+        background-color: #fff;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+        border-radius: 5px;
+        padding: 15px 20px;
+    }
+
+    .name_popup_wrap .name_pop_content h3 {
+        /* padding: 20px; */
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .name_popup_wrap .name_pop_content .file_name_input {
+        margin: 0 auto;
+        display: block;
+        width: calc(100% - 15px);
+        height: 20px;
+        margin-bottom: 20px;
+        padding: 5px;
+    }
+
+    .name_pop_content .name_pop_btn_area {
+        text-align: center;
+        font-size: 0;
+    }
+
+    .name_pop_content .name_pop_btn_area div {
+        display: inline-block;
+        /* width: 50px;
+        height: 20px; */
+        padding: 5px 10px;
+        border: 1px solid #333;
+        border-radius: 2px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    .name_pop_content .name_pop_btn_area div:first-child {
+        margin-right: 10px;
+    }
+
+    .name_pop_content .fa-xmark {
+        float: right;
+        cursor: pointer;
+    }
+    /* name popup css end */

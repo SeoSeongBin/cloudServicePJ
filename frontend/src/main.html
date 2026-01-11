@@ -378,6 +378,68 @@
         background-color: rgba(64, 118, 255, 1);
     }
 
+    .name_popup_wrap {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 1;
+    }
+
+    .name_popup_wrap .pop_bac {
+        width: 100%;
+        height: 100%;
+        background-color: #00000043;
+    }
+
+    .name_popup_wrap .name_pop_content {
+        width: 300px;
+        /* height: 200px; */
+        background-color: #fff;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+        border-radius: 5px;
+        padding: 15px 20px;
+    }
+
+    .name_popup_wrap .name_pop_content h3 {
+        /* padding: 20px; */
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .name_popup_wrap .name_pop_content .name_input {
+        margin: 0 auto;
+        display: block;
+        width: calc(100% - 15px);
+        height: 20px;
+        margin-bottom: 20px;
+        padding: 5px;
+    }
+
+    .name_pop_content .name_pop_btn_area {
+        text-align: center;
+        font-size: 0;
+    }
+
+    .name_pop_content .name_pop_btn_area div {
+        display: inline-block;
+        /* width: 50px;
+        height: 20px; */
+        padding: 5px 10px;
+        border: 1px solid #333;
+        border-radius: 2px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    .name_pop_content .name_pop_btn_area div:first-child {
+        margin-right: 10px;
+    }
     .dn{
         display: none;
     }
@@ -479,6 +541,18 @@
             <div class="file"></div>
             <div class="file"></div>
             <div class="file"></div>
+        </div>
+    </div>
+
+    <div class="name_popup_wrap">
+        <div class="pop_bac"></div>
+        <div class="name_pop_content">
+            <h3>새 폴더 <i class="fa-solid fa-xmark"></i></h3>
+            <input class="name_input" type="text" placeholder="이름을 입력해주세요">
+            <div class="name_pop_btn_area">
+                <div class="save_btn">확인</div>
+                <div class="close_btn">닫기</div>
+            </div>
         </div>
     </div>
 </body>
