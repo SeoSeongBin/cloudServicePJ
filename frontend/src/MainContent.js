@@ -1,7 +1,7 @@
 import react, {useEffect,useState, useRef} from "react";
 import { useNavigate } from "react-router-dom"; // 상단에 추가
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSquareCheck, faUpload, faTrashCan, faFileZipper, faTimes, faFile, faCirclePause, faArrowUpFromBracket,faFileCode,faFileImage, faFilePdf,faFilePowerpoint,faFileCsv,faFileWord, faFolder, faSpinner,faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { faSquareCheck, faUpload, faTrashCan, faFileZipper, faTimes, faFile, faCirclePause, faArrowUpFromBracket,faFileCode,faFileImage, faFilePdf,faFilePowerpoint,faFileCsv,faFileWord, faFolder, faSpinner,faCheckCircle, faL } from '@fortawesome/free-solid-svg-icons';
 import { faSquare } from '@fortawesome/free-regular-svg-icons';
 
 export default function Content() {
@@ -10,6 +10,7 @@ export default function Content() {
     let [chkStatus, chkstatus] = useState(false);
     let [uploadQueue, setUploadQueue] = useState([]);
     let [newNamePop, newNamePopSata] = useState(false);
+    let [namePopType, newnamePopType] = useState(false);
     let fileInputRef = useRef(null);
     let [namePopTit, setNamePopTit] = useState("");
     let [fileName, setFileName] = useState('');
@@ -37,11 +38,13 @@ export default function Content() {
     let toggleNamePop = () => {
         newNamePopSata(!newNamePop);
         setNamePopTit("새 폴더");
+        newnamePopType(false);
     }
     // 이름바꾸기
     let toggleNamePop2 = () => {
         newNamePopSata(!newNamePop);
         setNamePopTit("이름 바꾸기");
+        newnamePopType(true);
     }
 
     let toggleUploadPopShowHide = () => {
@@ -119,9 +122,6 @@ export default function Content() {
                 if (res.ok) {
                     // 2. 서버가 보낸 Map(JSON) 데이터를 파싱
                     const data = await res.json();
-                    console.log("data======================");
-                    console.log(data);
-                    console.log("data======================");
                     // 3. 서버가 담아준 status 값이 "success"인지 확인
                     if (data.status === "success") {
                         alert("삭제가 완료되었습니다.");
@@ -199,7 +199,7 @@ export default function Content() {
     };
 
     const namePopSaveBtn = () => {
-        if(namePopTit == "새 폴더"){
+        if(namePopType == false){
             if (fileName.trim() === "") {
                 alert("이름을 입력해주세요.");
                 return;
@@ -211,7 +211,7 @@ export default function Content() {
                 type: 'folder'
             };
 
-            setItemList((prev) => [...prev, newItem]);
+            // setItemList((prev) => [...prev, newItem]);
             
             // 입력창 비우고 팝업 닫기
             setFileName('');
@@ -227,10 +227,13 @@ export default function Content() {
     const fileListFunction=() => {
         try {
             fetch('/api/fileList', {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     "Content-Type": "application/json"
-                }
+                },
+                body: JSON.stringify({
+                    upId:"0" 
+                })
             })
             .then((res) => res.json())
             .then((data) => {

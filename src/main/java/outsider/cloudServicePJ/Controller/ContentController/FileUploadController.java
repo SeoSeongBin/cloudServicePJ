@@ -31,11 +31,30 @@ public class FileUploadController {
 
     @RequestMapping("/api/fileList")
     @ResponseBody
-    public Map<String, Object> fileList(Map<String, Object> data) throws Exception{
-    Map<String, Object> result = new HashMap<>();
+    public Map<String, Object> fileList(@RequestBody Map<String, Object> data, HttpServletRequest request) throws Exception{
+        Map<String, Object> result = new HashMap<>();
         
         try {
+            // 파일 vo 세팅
             FileManageVO vo = new FileManageVO();
+
+            // 로그인 정보 가오
+            HttpSession session = request.getSession(false);
+            // 세션에서 가져온 email(id)값 변수처리
+            LoginVO user = (LoginVO) session.getAttribute("loginUser");
+
+            String email = user.getUI_EMAIL();
+            // String phoneNum = user.getUI_BACK_SEAT_PHONE_NUM();
+
+            Object upIdObj = data.get("upId");
+            Integer upId = 0; // 기본값 설정
+            if (upIdObj != null) {
+                upId = Integer.parseInt(String.valueOf(upIdObj));
+            }
+
+            // vo.setUI_BACK_SEAT_PHONE_NUM(phoneNum);
+            vo.setFM_UI_USER_EMAIL(email);
+            vo.setFM_UP_FILE_ID(upId);
             // 1. Mapper를 통해 DB에서 리스트를 가져옴
             // (Mapper 인터페이스의 리턴 타입이 List<FileManageVO>여야 합니다)
             List<FileManageVO> list = mainMapper.fileListData(vo);
@@ -48,6 +67,7 @@ public class FileUploadController {
             e.printStackTrace();
             result.put("status", "error");
             result.put("message", e.getMessage());
+            System.out.println("list 문 에러로 빠질때");
         }
         
         return result;
@@ -179,10 +199,6 @@ public class FileUploadController {
                     if(fileData != null){
                         // 파일경로
                         String filePath = osPath+fileData.getFM_FILE_PATH();
-
-                        System.out.println("filePath==================");
-                        System.out.println(filePath);
-                        System.out.println("filePath==================");
                         // 해당 경로 파일 변수지정
                         File file = new File(filePath);
                         if(file.exists()) {

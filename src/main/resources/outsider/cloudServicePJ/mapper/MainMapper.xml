@@ -10,9 +10,9 @@
             LEFT OUTER JOIN USER_INFO B
             ON A.FM_UI_USER_EMAIL = B.UI_EMAIL
         WHERE
-            B.UI_BACK_SEAT_PHONE_NUM = '0365'
-            AND A.FM_UI_USER_EMAIL = 'rhkwkwlq88@naver.com'
-            AND A.FM_UP_FILE_ID = '0'
+            <!-- B.UI_BACK_SEAT_PHONE_NUM = ${UI_BACK_SEAT_PHONE_NUM} -->
+            A.FM_UI_USER_EMAIL = #{FM_UI_USER_EMAIL}
+            AND A.FM_UP_FILE_ID = #{FM_UP_FILE_ID}
     </select>
     <select id="fileData" resultType="outsider.cloudServicePJ.VO.FileManageVO">
         SELECT
