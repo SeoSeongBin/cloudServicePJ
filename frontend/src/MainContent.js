@@ -1,7 +1,7 @@
 import react, {useEffect,useState, useRef} from "react";
 import { useNavigate } from "react-router-dom"; // 상단에 추가
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSquareCheck, faUpload, faTrashCan, faFileZipper, faTimes, faFile, faCirclePause, faArrowUpFromBracket,faFileCode,faFileImage, faFilePdf,faFilePowerpoint,faFileCsv,faFileWord, faFolder, faSpinner,faCheckCircle, faL } from '@fortawesome/free-solid-svg-icons';
+import { faSquareCheck, faUpload, faTrashCan, faFileZipper, faTimes, faFile, faCirclePause, faArrowUpFromBracket,faFileCode,faFileImage, faFilePdf,faFilePowerpoint,faFileCsv,faFileWord, faFolder, faSpinner,faCheckCircle, faDownload } from '@fortawesome/free-solid-svg-icons';
 import { faSquare } from '@fortawesome/free-regular-svg-icons';
 
 export default function Content() {
@@ -23,8 +23,8 @@ export default function Content() {
     let [progress, setProgress] = useState(0);
     // 선택된 파일들의 ID 배열
     let [selectedIds, setSelectedIds] = useState([]);
-    // 선택된 파일 상태 on, off
-    let [selectFile, selectFileStat] = useState(false);
+    // 선택된 파일 유무 확인용
+    let isAnySelected = selectedIds.length > 0;
 
     let toggleAllSelect = () => {
         chkstatus(!chkStatus);
@@ -205,22 +205,41 @@ export default function Content() {
                 return;
             }
             // 고유 ID (삭제나 수정 시 필요)
-            const newItem = {
-                id: Date.now(), 
-                name: fileName,
-                type: 'folder'
-            };
+            // const newItem = {
+            //     id: Date.now(), 
+            //     name: fileName,
+            //     type: 'folder'
+            // };
 
+            
+            fetch('/api/newFolder', {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    fileName:fileName 
+                })
+            })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.status === "success" && data.list) {
+                    // 서버에서 받은 list를 상태에 저장
+                    setItemList(data.list); 
+                }
+            })
             // setItemList((prev) => [...prev, newItem]);
             
-            // 입력창 비우고 팝업 닫기
+
+        }else{
+
+        }
+
+                    // 입력창 비우고 팝업 닫기
             setFileName('');
             newNamePopSata(false);
 
             fileListFunction();
-        }else{
-
-        }
     }
 
     // 파일 리스트 불러오는 로직
@@ -301,7 +320,8 @@ export default function Content() {
                 <div className={`btn all_chk_btn ${chkStatus ? "on" : ""}`} onClick={toggleAllSelect}>전체선택 <FontAwesomeIcon icon={chkStatus ? faSquareCheck : faSquare} /></div>
                 <div className="btn file_new_folder_btn" onClick={toggleNamePop}>새 폴더</div>
                 <div className="btn file_upload_btn" onClick={handleUploadClick}>업로드 <FontAwesomeIcon icon={faUpload} /></div>
-                <div className="btn file_delete_btn" onClick={removeFile}><FontAwesomeIcon icon={faTrashCan} /></div>
+                <div className={`btn ${selectedIds.length === 0 ? "dn" : ""}`}>다운로드 <FontAwesomeIcon icon={faDownload} /></div>
+                <div className={`btn file_delete_btn ${selectedIds.length === 0 ? "dn" : ""}`} onClick={removeFile}><FontAwesomeIcon icon={faTrashCan} /></div>
             </div>
 
             <div class="upload_show_btn" onClick={toggleUploadPopShowHide}>

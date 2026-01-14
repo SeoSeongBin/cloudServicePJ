@@ -35,7 +35,6 @@ public class LoginController {
             LoginVO user = loginMapper.LoginFunction(loginParams);
         String msg;
         try{
-            System.out.println(user.getUI_PASSWORD());
             if(user != null && passwordEncoder.matches(pw, user.getUI_PASSWORD())){
                 HttpSession session = request.getSession();
                 session.setAttribute("loginUser", user);    // 로그인 사용자 정보를 세션에 저장

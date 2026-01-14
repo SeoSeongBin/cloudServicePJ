@@ -31,7 +31,6 @@ export default function Header() {
         })
         .then(data => {
             if(data){
-                console.log(data);
                 // 로그인 정보가 존재할 경우 유저명 세팅
                 setUserNM(data.userInfo.ui_NAME);
             }else{

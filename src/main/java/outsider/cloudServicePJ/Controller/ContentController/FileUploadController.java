@@ -44,15 +44,14 @@ public class FileUploadController {
             LoginVO user = (LoginVO) session.getAttribute("loginUser");
 
             String email = user.getUI_EMAIL();
-            // String phoneNum = user.getUI_BACK_SEAT_PHONE_NUM();
+            String phoneNum = user.getUI_BACK_SEAT_PHONE_NUM();
 
             Object upIdObj = data.get("upId");
             Integer upId = 0; // 기본값 설정
             if (upIdObj != null) {
                 upId = Integer.parseInt(String.valueOf(upIdObj));
             }
-
-            // vo.setUI_BACK_SEAT_PHONE_NUM(phoneNum);
+            vo.setUI_BACK_SEAT_PHONE_NUM(phoneNum);
             vo.setFM_UI_USER_EMAIL(email);
             vo.setFM_UP_FILE_ID(upId);
             // 1. Mapper를 통해 DB에서 리스트를 가져옴
@@ -78,7 +77,8 @@ public class FileUploadController {
     public Map<String, Object> fileUpload(
         @RequestParam("files") List<MultipartFile> files, // 파일 리스트 받기
         @RequestParam(value = "parentId", required = false, defaultValue = "0") int parentId, // parentId 받기
-        HttpServletRequest request) throws Exception {
+        HttpServletRequest request
+    ) throws Exception {
         
         Map<String, Object> result = new HashMap<>();
         // 현재 사용 OS 변수화
@@ -94,18 +94,19 @@ public class FileUploadController {
             osPath = System.getProperty("user.home");
         }
 
-        // 경로 지정
-        File saveDir = new File(osPath+uploadPath);
-        
-        // 폴더가 없으면 생성
-        if (!saveDir.exists()) {
-            saveDir.mkdirs();
-        }
         try {
             // 세션 처리
             HttpSession session = request.getSession(false);
             // 세션에서 가져온 email(id)값 변수처리
             LoginVO user = (LoginVO) session.getAttribute("loginUser");
+
+            // 경로 지정
+            File saveDir = new File(osPath+uploadPath+user.getUI_EMAIL());
+            
+            // 폴더가 없으면 생성
+            if (!saveDir.exists()) {
+                saveDir.mkdirs();
+            }
             String email = user.getUI_EMAIL();
 
             // 넘어온 파일들을 하나씩 꺼내서 DB에 등록
@@ -152,9 +153,65 @@ public class FileUploadController {
 
     @RequestMapping("/api/newFolder")
     @ResponseBody
-    public Map<String, Object> newFolder(@RequestBody Map<String, Object> data) throws Exception{
+    public Map<String, Object> newFolder(
+        @RequestBody Map<String, Object> data, 
+        HttpServletRequest request
+    ) throws Exception {
         Map<String, Object> result = new HashMap<>();
         
+        // 1. 세션 및 유저 정보 검증
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("loginUser") == null) {
+            result.put("status", "null");
+            return result;
+        }
+        LoginVO user = (LoginVO) session.getAttribute("loginUser");
+        
+        try {
+            // 2. 전달 데이터 파싱 (안전하게 변환)
+            String folderName = String.valueOf(data.get("fileName"));
+            // React에서 같이 보낸 parentId가 있다면 data에서 꺼냄
+            int parentId = data.get("parentId") != null ? Integer.parseInt(String.valueOf(data.get("parentId"))) : 0;
+
+            // 3. OS별 경로 설정
+            String os = System.getProperty("os.name").toLowerCase();
+            String rootPath = os.contains("win") ? "C:" : System.getProperty("user.home");
+            
+            // 실제 저장될 물리 경로 (예: C:/upload/유저이메일/폴더명)
+            // 유저별로 공간을 분리하는 것이 보안상 좋습니다.
+            String relativePath = uploadPath + user.getUI_EMAIL() + "/" + folderName;
+            File saveDir = new File(rootPath + relativePath);
+            
+            // 4. 물리 폴더 생성 및 체크
+            if (saveDir.exists()) {
+                result.put("status", "error");
+                result.put("message", "이미 존재하는 폴더명입니다.");
+                return result;
+            }
+
+            if (!saveDir.mkdirs()) {
+                throw new Exception("폴더 생성에 실패했습니다.");
+            }
+
+            // 5. DB 기록
+            FileManageVO vo = new FileManageVO();
+            vo.setFM_FILE_NAME(folderName); // 폴더 이름 저장
+            vo.setFM_FILE_PATH("/uploads/" + folderName); // 접근 경로 저장
+            vo.setFM_FILE_TYPE("D"); // Directory의 'D'
+            vo.setFM_UI_USER_EMAIL(user.getUI_EMAIL());
+            vo.setFM_UP_FILE_ID(parentId);
+            vo.setFM_FILE_EXTENSION_TYPE(""); // 폴더는 확장자 없음
+
+            mainMapper.fileUploadData(vo);
+            
+            result.put("status", "success");
+            result.put("message", "폴더가 생성되었습니다.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("status", "error");
+            result.put("message", "서버 오류: " + e.getMessage());
+        }
         return result;
     }
 
@@ -180,6 +237,7 @@ public class FileUploadController {
             }else{
                 osPath = System.getProperty("user.home")+"/cloud_storage";
             }
+            
 
             if(session == null){
                 result.put("status", "null");
@@ -198,7 +256,7 @@ public class FileUploadController {
                     // select 한 데이터가 존재할경우 해당 경로에 존재하는 파일 제거
                     if(fileData != null){
                         // 파일경로
-                        String filePath = osPath+fileData.getFM_FILE_PATH();
+                        String filePath = osPath+"/uploads/"+fileData.getFM_UI_USER_EMAIL()+"/"+fileData.getFM_FILE_NAME();
                         // 해당 경로 파일 변수지정
                         File file = new File(filePath);
                         if(file.exists()) {
