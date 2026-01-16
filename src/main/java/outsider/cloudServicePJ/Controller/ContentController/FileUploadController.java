@@ -1,11 +1,13 @@
 package outsider.cloudServicePJ.Controller.ContentController;
 
 import java.io.File;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import outsider.cloudServicePJ.VO.FileManageVO;
@@ -20,6 +22,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.StreamUtils;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import org.springframework.util.StreamUtils;
 
 @Controller
 public class FileUploadController {
@@ -149,6 +158,70 @@ public class FileUploadController {
         }
         
         return result;
+    }
+
+    @RequestMapping("/api/fileDown")
+    @ResponseBody 
+    public Map<String, Object> fileDown(@RequestBody Map<String, Object> data, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Map<String, Object> result = new HashMap<>();
+
+        // 1. 유저 정보 및 세션 체크
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("loginUser") == null) {
+            result.put("status", "null");
+            return result;
+        }
+        LoginVO user = (LoginVO) session.getAttribute("loginUser");
+        String userId = user.getUI_EMAIL();
+
+        // 2. OS별 경로 설정
+        String os = System.getProperty("os.name").toLowerCase();
+        String osPath = os.contains("win") ? "C:/cloud_storage" : System.getProperty("user.home") + "/cloud_storage";
+
+        // 3. 파일 정보 가져오기
+        Object fileIdObj = data.get("fileId");
+        if (fileIdObj == null) {
+            result.put("status", "fail");
+            return result;
+        }
+        
+        int fileId = Integer.parseInt(fileIdObj.toString());
+        FileManageVO vo = new FileManageVO();
+        vo.setFM_ID(fileId);
+
+        FileManageVO resultVO = mainMapper.fileData(vo);
+        
+        if (resultVO == null) {
+            result.put("status", "not_found");
+            return result;
+        }
+
+        // 4. 실제 파일 객체 생성
+        String path = osPath +"/uploads/"+ userId + "/" + resultVO.getFM_FILE_NAME();
+        File file = new File(path);
+        
+        if (file.exists()) {
+            // 5. 다운로드를 위한 응답 헤더 설정
+            // 한글 파일명 깨짐 방지 인코딩
+            String encodedFileName = URLEncoder.encode(resultVO.getFM_FILE_NAME(), "UTF-8").replaceAll("\\+", "%20");
+            
+            response.setContentType("application/octet-stream");
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFileName + "\"");
+            response.setContentLength((int) file.length());
+
+            // 6. 파일 읽어서 전송 (try-with-resources로 스트림 자동 닫기)
+            try (InputStream is = new FileInputStream(file);
+                OutputStream osStream = response.getOutputStream()) {
+                StreamUtils.copy(is, osStream);
+                osStream.flush();
+            }
+            
+            // 파일 전송 후에는 Map을 리턴해도 무시되므로 null을 반환하거나 종료합니다.
+            return null; 
+        } else {
+            result.put("status", "file_not_exists");
+            return result;
+        }
     }
 
     @RequestMapping("/api/newFolder")

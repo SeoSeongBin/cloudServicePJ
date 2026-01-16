@@ -23,8 +23,6 @@ export default function Content() {
     let [progress, setProgress] = useState(0);
     // 선택된 파일들의 ID 배열
     let [selectedIds, setSelectedIds] = useState([]);
-    // 선택된 파일 유무 확인용
-    let isAnySelected = selectedIds.length > 0;
 
     let toggleAllSelect = () => {
         chkstatus(!chkStatus);
@@ -266,6 +264,87 @@ export default function Content() {
         }
     }
 
+    // 파일 다운로드\
+    const fileDownFunction = async () => {
+        if (selectedIds.length === 0) {
+            alert("다운로드할 파일을 선택해주세요.");
+            return;
+        }
+
+        for (let id of selectedIds) {
+            try {
+                const response = await fetch('/api/fileDown', {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        fileId: id
+                    })
+                });
+
+                // 1️⃣ Content-Type 확인
+                const contentType = response.headers.get("Content-Type") || "";
+
+                // 2️⃣ JSON 응답이면 → 다운로드 중단
+                if (contentType.includes("application/json")) {
+                    const json = await response.json();
+
+                    switch (json.status) {
+                        case "file_not_exists":
+                            alert("파일이 존재하지 않습니다.");
+                            break;
+                        case "null":
+                            alert("로그인이 필요합니다.");
+                            break;
+                        case "not_found":
+                            alert("파일 정보가 없습니다.");
+                            break;
+                        case "fail":
+                            alert("잘못된 요청입니다.");
+                            break;
+                        default:
+                            alert("다운로드 중 오류가 발생했습니다.");
+                    }
+                    continue; // 다음 파일 처리
+                }
+
+                // 3️⃣ 파일 응답일 때만 Blob 처리
+                const blob = await response.blob();
+
+                // 4️⃣ 파일명 추출
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let fileName = `file_${id}`;
+
+                if (contentDisposition && contentDisposition.includes('filename=')) {
+                    fileName = decodeURIComponent(
+                        contentDisposition
+                            .split('filename=')[1]
+                            .replace(/"/g, '')
+                    );
+                }
+
+                // 5️⃣ 다운로드 실행
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+
+                document.body.appendChild(a);
+                a.click();
+
+                // 6️⃣ 정리
+                a.remove();
+                window.URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error("다운로드 중 오류 발생:", error);
+                alert("파일 다운로드 중 오류가 발생했습니다.");
+            }
+        }
+    };
+
+
 
     useEffect(() =>{
         fileListFunction();
@@ -320,7 +399,7 @@ export default function Content() {
                 <div className={`btn all_chk_btn ${chkStatus ? "on" : ""}`} onClick={toggleAllSelect}>전체선택 <FontAwesomeIcon icon={chkStatus ? faSquareCheck : faSquare} /></div>
                 <div className="btn file_new_folder_btn" onClick={toggleNamePop}>새 폴더</div>
                 <div className="btn file_upload_btn" onClick={handleUploadClick}>업로드 <FontAwesomeIcon icon={faUpload} /></div>
-                <div className={`btn ${selectedIds.length === 0 ? "dn" : ""}`}>다운로드 <FontAwesomeIcon icon={faDownload} /></div>
+                <div className={`btn ${selectedIds.length === 0 ? "dn" : ""}`} onClick={fileDownFunction}>다운로드 <FontAwesomeIcon icon={faDownload} /></div>
                 <div className={`btn file_delete_btn ${selectedIds.length === 0 ? "dn" : ""}`} onClick={removeFile}><FontAwesomeIcon icon={faTrashCan} /></div>
             </div>
 

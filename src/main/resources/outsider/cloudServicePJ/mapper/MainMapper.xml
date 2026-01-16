@@ -16,7 +16,8 @@
     </select>
     <select id="fileData" resultType="outsider.cloudServicePJ.VO.FileManageVO">
         SELECT
-            A.*
+            A.*,
+            B.UI_BACK_SEAT_PHONE_NUM
         FROM
             FILE_MANAGE A
             LEFT OUTER JOIN USER_INFO B
