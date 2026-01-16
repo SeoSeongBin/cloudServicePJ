@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 import java.io.File;
 import java.io.FileInputStream;
@@ -199,7 +200,7 @@ public class FileUploadController {
         // 4. 실제 파일 객체 생성
         String path = osPath +"/uploads/"+ userId + "/" + resultVO.getFM_FILE_NAME();
         File file = new File(path);
-        
+
         if (file.exists()) {
             // 5. 다운로드를 위한 응답 헤더 설정
             // 한글 파일명 깨짐 방지 인코딩
@@ -326,14 +327,33 @@ public class FileUploadController {
                     // file id에 해당하는 data select
                     FileManageVO fileData = mainMapper.fileData(vo);
 
+                    String fileType = fileData.getFM_FILE_TYPE();
+
                     // select 한 데이터가 존재할경우 해당 경로에 존재하는 파일 제거
                     if(fileData != null){
                         // 파일경로
                         String filePath = osPath+"/uploads/"+fileData.getFM_UI_USER_EMAIL()+"/"+fileData.getFM_FILE_NAME();
                         // 해당 경로 파일 변수지정
-                        File file = new File(filePath);
-                        if(file.exists()) {
-                            file.delete();
+
+                        if ("D".equals(fileType)){
+                            
+                            File folder = new File(filePath);
+                            System.out.println("exists=" + folder.exists());
+                            System.out.println("isDirectory=" + folder.isDirectory());
+                            System.out.println("absolutePath=" + folder.getAbsolutePath());
+                            if (folder.exists()) {
+                                // 하위 파일 및 폴더를 포함하여 전체 삭제
+                                boolean success = FileSystemUtils.deleteRecursively(folder);
+                                
+                                if (success) {
+                                    System.out.println("폴더 및 하위 항목 삭제 완료");
+                                }
+                            }
+                        }else{
+                            File file = new File(filePath);
+                            if(file.exists()) {
+                                file.delete();
+                            }
                         }
                         // db에서 데이터 삭제
                         mainMapper.fileDelteData(vo);

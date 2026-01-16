@@ -225,10 +225,11 @@ export default function Content() {
                     // 서버에서 받은 list를 상태에 저장
                     setItemList(data.list); 
                 }
+                fileListFunction();
             })
             // setItemList((prev) => [...prev, newItem]);
             
-
+            
         }else{
 
         }
