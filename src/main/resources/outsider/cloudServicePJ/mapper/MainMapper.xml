@@ -10,7 +10,6 @@
             LEFT OUTER JOIN USER_INFO B
             ON A.FM_UI_USER_EMAIL = B.UI_EMAIL
         WHERE
-            <!-- B.UI_BACK_SEAT_PHONE_NUM = ${UI_BACK_SEAT_PHONE_NUM} -->
             A.FM_UI_USER_EMAIL = #{FM_UI_USER_EMAIL}
             AND A.FM_UP_FILE_ID = #{FM_UP_FILE_ID}
     </select>
@@ -24,6 +23,30 @@
             ON A.FM_UI_USER_EMAIL = B.UI_EMAIL
         WHERE
             A.FM_ID = #{FM_ID}
+    </select>
+    <select id="filePathData" resultType="outsider.cloudServicePJ.VO.FileManageVO">
+        WITH RECURSIVE FilePath AS (
+            SELECT 
+                FM_ID, 
+                FM_UP_FILE_ID, 
+                FM_FILE_NAME,
+                1 AS depth
+            FROM FILE_MANAGE
+            WHERE FM_ID = #{FM_ID}
+
+            UNION ALL
+            
+            SELECT 
+                f.FM_ID, 
+                f.FM_UP_FILE_ID, 
+                f.FM_FILE_NAME,
+                fp.depth + 1
+            FROM FILE_MANAGE f
+            INNER JOIN FilePath fp ON f.FM_ID = fp.FM_UP_FILE_ID
+        )
+        SELECT 
+            GROUP_CONCAT(FM_FILE_NAME ORDER BY depth DESC SEPARATOR '/') AS FULL_PATH
+        FROM FilePath;
     </select>
     <insert id="fileUploadData">
         INSERT INTO	FILE_MANAGE
@@ -52,6 +75,19 @@
         DELETE FROM FILE_MANAGE
         WHERE
             FM_ID = #{FM_ID}
+    </delete>
+    <delete id="deleteFolderRecursive">
+        DELETE FROM FILE_MANAGE
+        WHERE FM_ID IN (
+            WITH RECURSIVE FolderHierarchy AS (
+                SELECT FM_ID FROM FILE_MANAGE WHERE FM_ID = #{FM_ID}
+                UNION ALL
+                SELECT f.FM_ID 
+                FROM FILE_MANAGE f
+                INNER JOIN FolderHierarchy fh ON f.FM_UP_FILE_ID = fh.FM_ID
+            )
+            SELECT FM_ID FROM FolderHierarchy
+        )
     </delete>
 
 </mapper>

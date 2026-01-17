@@ -14,4 +14,7 @@ public class FileManageVO {
 	private Integer FM_UP_FILE_ID;
     // 파일 join을 위해 추가
     private String UI_BACK_SEAT_PHONE_NUM;
+
+    // 경로를 위해 추가
+    private String FULL_PATH;
 }

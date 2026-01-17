@@ -1,19 +1,28 @@
 import react, {useEffect,useState, useRef} from "react";
 import { useNavigate } from "react-router-dom"; // 상단에 추가
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSquareCheck, faUpload, faTrashCan, faFileZipper, faTimes, faFile, faCirclePause, faArrowUpFromBracket,faFileCode,faFileImage, faFilePdf,faFilePowerpoint,faFileCsv,faFileWord, faFolder, faSpinner,faCheckCircle, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faSquareCheck, faUpload, faTrashCan, faFileZipper, faTimes, faFile, faCirclePause, faArrowUpFromBracket,faFileCode,faFileImage, faFilePdf,faFilePowerpoint,faFileCsv,faFileWord, faFolder, faSpinner,faCheckCircle, faDownload, faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { faSquare } from '@fortawesome/free-regular-svg-icons';
 
 export default function Content() {
     const navigate = useNavigate();
+    // 업로드 팝업 show(true), hide(false) 처리를 위한 상태값
     let [uploadShowHide, uploadShowHideStat] = useState(false);
+    // 전체선택 유무확인
     let [chkStatus, chkstatus] = useState(false);
+    // 파일 업로드 대기열
     let [uploadQueue, setUploadQueue] = useState([]);
+
     let [newNamePop, newNamePopSata] = useState(false);
+    // 이름 팝업창 종류(false:새폴더, true:이름변경)
     let [namePopType, newnamePopType] = useState(false);
+
     let fileInputRef = useRef(null);
+    // 이름 팝업창 타이틀(새폴더, 이름변경)
     let [namePopTit, setNamePopTit] = useState("");
+    // 변경할 내용 적혀져있는 파일 이름
     let [fileName, setFileName] = useState('');
+    // 현재 디렉토리 파일 리스트
     let [itemList, setItemList] = useState([]);
     // 업로드 완료된 파일 개수를 관리할 상태
     let [completedCount, setCompletedCount] = useState(0);
@@ -23,13 +32,17 @@ export default function Content() {
     let [progress, setProgress] = useState(0);
     // 선택된 파일들의 ID 배열
     let [selectedIds, setSelectedIds] = useState([]);
+    // 더블클릭한 파일 ID
+    let [dbClickFileId, setDbFileId] = useState('');
+    // 최상위 폴더 ID
+    let [topFileId, settopFileId] = useState('0');
+    // 현재 디렉토리 ID
+    let [nowFileId, setNowFileId] = useState('0');
+    // 이전 디렉토리 ID
+    let [backFileId, setBackFileId] = useState('');
 
     let toggleAllSelect = () => {
         chkstatus(!chkStatus);
-
-        if(chkStatus === true){
-
-        }
     };
 
     // 새폴더
@@ -105,7 +118,7 @@ export default function Content() {
     const removeFile = async () => {
         const formData = new FormData();
         selectedIds.forEach(id => formData.append('files', id));
-        // formData.append('parentId', 0);
+        formData.append('parentId', nowFileId);
         // console.log(selectedIds.length);
 
         // 선택된 파일이 없을경우
@@ -124,7 +137,7 @@ export default function Content() {
                     if (data.status === "success") {
                         alert("삭제가 완료되었습니다.");
                         setSelectedIds([]);
-                        fileListFunction();
+                        fileListFunction(nowFileId);
                     }else if(data.status === "null"){
                         alert("로그인이 끊어졌습니다.");
                         navigate("/login");
@@ -151,7 +164,9 @@ export default function Content() {
 
         const formData = new FormData();
         uploadQueue.forEach(file => formData.append('files', file));
-        formData.append('parentId', 0);
+        
+        console.log("전송 직전 parentId:", nowFileId);
+        formData.append('parentId', nowFileId);
 
         setUploadStatus("uploading");
 
@@ -176,7 +191,7 @@ export default function Content() {
                         setUploadStatus("idle");
                     }, 1000);
 
-                    fileListFunction();
+                    fileListFunction(nowFileId);
                 } else {
                     // 서버에서 result.put("status", "error")를 보낸 경우
                     console.error("Server Logic Error:", data.message);
@@ -197,60 +212,53 @@ export default function Content() {
     };
 
     const namePopSaveBtn = () => {
-        if(namePopType == false){
+        if (namePopType === false) { // 새 폴더 생성 모드
             if (fileName.trim() === "") {
                 alert("이름을 입력해주세요.");
                 return;
             }
-            // 고유 ID (삭제나 수정 시 필요)
-            // const newItem = {
-            //     id: Date.now(), 
-            //     name: fileName,
-            //     type: 'folder'
-            // };
 
-            
             fetch('/api/newFolder', {
                 method: 'POST',
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    fileName:fileName 
+                    fileName: fileName,
+                    parentId: nowFileId // 현재 보고 있는 폴더 ID 전송
                 })
             })
             .then((res) => res.json())
             .then((data) => {
-                if (data.status === "success" && data.list) {
-                    // 서버에서 받은 list를 상태에 저장
-                    setItemList(data.list); 
+                if (data.status === "success") {
+                    // 1. 성공 시에만 리스트를 새로고침합니다.
+                    // 중요: nowFileId를 직접 넘겨서 최신 리스트를 가져오게 합니다.
+                    fileListFunction(nowFileId);
+                    
+                    // 2. 처리가 끝나면 입력창을 비우고 팝업을 닫습니다.
+                    setFileName('');
+                    newNamePopSata(false);
+                } else {
+                    alert("폴더 생성 실패: " + data.message);
                 }
-                fileListFunction();
             })
-            // setItemList((prev) => [...prev, newItem]);
-            
-            
-        }else{
-
+            .catch((err) => {
+                console.error("에러 발생:", err);
+                alert("서버 통신 중 오류가 발생했습니다.");
+            });
+        } else {
+            // 이름 바꾸기 로직 (생략)
         }
-
-                    // 입력창 비우고 팝업 닫기
-            setFileName('');
-            newNamePopSata(false);
-
-            fileListFunction();
-    }
+    };
 
     // 파일 리스트 불러오는 로직
-    const fileListFunction=() => {
+    const fileListFunction= async (fileId) => {
         try {
-            fetch('/api/fileList', {
+            await fetch('/api/fileList', {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    upId:"0" 
+                    upId:fileId 
                 })
             })
             .then((res) => res.json())
@@ -265,7 +273,7 @@ export default function Content() {
         }
     }
 
-    // 파일 다운로드\
+    // 파일 다운로드
     const fileDownFunction = async () => {
         if (selectedIds.length === 0) {
             alert("다운로드할 파일을 선택해주세요.");
@@ -345,14 +353,59 @@ export default function Content() {
         }
     };
 
+    // 리스트 목록 더블클릭 했을때 작동하는 로직
+    const fileDbClickFunction = async (folderId) => {
+        try {
+            const res = await fetch('/api/fileTypeChk', {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    fileId: folderId // 직접 받은 ID 사용
+                })
+            });
+            
+            const data = await res.json();
+
+            if (data.status === "success") {
+                // 파일의 타입이 폴더(type : D)일 경우에만 작동
+                if (data.fileType === "D") {
+                // 선택한 파일 ID 세팅
+                setNowFileId(data.fileId);
+
+                // 선택한 폴더의 상위폴더ID 세팅
+                setBackFileId(data.upFileId);
+
+                // 선택한 폴더의 리스트 세로 세팅 
+                fileListFunction(data.fileId);
+                }
+            }
+        } catch (err) {
+            console.error("폴더 진입 오류:", err);
+        }
+    }
+
+    // 이걸 선택할 경우 상위 폴더로 이동
+    const backFolderList = () => {
+        fileListFunction(backFileId);
+    }
+
 
 
     useEffect(() =>{
-        fileListFunction();
+        fileListFunction(nowFileId);
     }, []);
 
     // 파일 클릭 시 선택/해제 토글 함수
     const handleFileClick = (id) => {
+        // 마지막으로 클릭한 파일 id 를 변수로 세팅
+        setDbFileId(id);
+
+        if(topFileId === "0"){
+            settopFileId(id);
+        }
+
         // selectFileStat(!selectFile);
         setSelectedIds(prev => {
             if (prev.includes(id)) {
@@ -485,13 +538,14 @@ export default function Content() {
                         if (['ppt','pptx'].includes(fileExt)) fileIcon = faFilePowerpoint;
                         if (fileExt === 'csv') fileIcon = faFileCsv;
                         if (['doc','docx'].includes(fileExt)) fileIcon = faFileWord;
+                        if (fileExt === 'back') fileIcon = faEllipsis;
                     }
 
                     // 선택 여부 확인
                     let isSelected = selectedIds.includes(item.fm_ID);
                     
                     return (
-                        <div className={`file ${isSelected ? "on" : ""}`} key={item.fm_ID} onClick={() => handleFileClick(item.fm_ID)}>
+                        <div className={`file ${isSelected ? "on" : ""}`} key={item.fm_ID} onClick={() => handleFileClick(item.fm_ID)} onDoubleClick={() => fileDbClickFunction(item.fm_ID)}>
                             <div className="file_icon">
                                 {/* 결정된 아이콘 적용 및 폴더/파일 색상 구분(선택사항) */}
                                 <FontAwesomeIcon 

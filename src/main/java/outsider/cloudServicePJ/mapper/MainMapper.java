@@ -11,6 +11,8 @@ import outsider.cloudServicePJ.VO.FileManageVO;
 public interface MainMapper {
     public void fileUploadData(FileManageVO data);
     public FileManageVO fileData(FileManageVO data);
+    public FileManageVO filePathData(FileManageVO data);
     List<FileManageVO> fileListData(FileManageVO data);
     public void fileDelteData(FileManageVO data);
+    public void deleteFolderRecursive(FileManageVO data);
 }

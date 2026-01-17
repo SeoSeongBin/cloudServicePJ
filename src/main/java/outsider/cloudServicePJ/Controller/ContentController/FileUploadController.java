@@ -26,10 +26,14 @@ import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StreamUtils;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import org.springframework.util.StreamUtils;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+import java.nio.charset.StandardCharsets;
 
 @Controller
 public class FileUploadController {
@@ -105,23 +109,41 @@ public class FileUploadController {
         }
 
         try {
-            // 세션 처리
-            HttpSession session = request.getSession(false);
-            // 세션에서 가져온 email(id)값 변수처리
-            LoginVO user = (LoginVO) session.getAttribute("loginUser");
-
-            // 경로 지정
-            File saveDir = new File(osPath+uploadPath+user.getUI_EMAIL());
             
-            // 폴더가 없으면 생성
-            if (!saveDir.exists()) {
-                saveDir.mkdirs();
-            }
-            String email = user.getUI_EMAIL();
-
             // 넘어온 파일들을 하나씩 꺼내서 DB에 등록
             for (MultipartFile file : files) {
                 String originalFileName = file.getOriginalFilename();
+                
+
+                // 세션 처리
+                HttpSession session = request.getSession(false);
+                // 세션에서 가져온 email(id)값 변수처리
+                LoginVO user = (LoginVO) session.getAttribute("loginUser");
+    
+                FileManageVO filePathVo = new FileManageVO();
+                filePathVo.setFM_ID(parentId);
+
+                String fileFullPaht = "";
+                FileManageVO filePathData = mainMapper.filePathData(filePathVo);
+                if (filePathData == null) {
+                    System.out.println("데이터가 없어서 null이 담겼습니다.");
+                } else {
+                    fileFullPaht = "/"+filePathData.getFULL_PATH();
+                }
+
+                String filePath = osPath+uploadPath+user.getUI_EMAIL()+fileFullPaht;
+
+                System.out.println(filePath);
+                // 경로 지정
+                File saveDir = new File(filePath);
+                
+                // 폴더가 없으면 생성
+                if (!saveDir.exists()) {
+                    saveDir.mkdirs();
+                }
+
+                
+                String email = user.getUI_EMAIL();
                 
                 // 2. 실제 파일 저장
                 // File.separator를 사용하여 OS에 맞는 경로 구분자 처리
@@ -134,7 +156,7 @@ public class FileUploadController {
                 
                 // DB에는 실제 경로보다는 접근 가능한 URL용 경로를 저장하는 것이 관례입니다.
                 // 예: /uploads/test.jpg
-                vo.setFM_FILE_PATH("/uploads/" + originalFileName); 
+                vo.setFM_FILE_PATH(filePath); 
                 
                 vo.setFM_FILE_SIZE(file.getSize());
                 vo.setFM_FILE_TYPE("F");
@@ -162,11 +184,11 @@ public class FileUploadController {
     }
 
     @RequestMapping("/api/fileDown")
-    @ResponseBody 
+    @ResponseBody
     public Map<String, Object> fileDown(@RequestBody Map<String, Object> data, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Map<String, Object> result = new HashMap<>();
 
-        // 1. 유저 정보 및 세션 체크
+        // 1. 세션 체크
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("loginUser") == null) {
             result.put("status", "null");
@@ -175,55 +197,110 @@ public class FileUploadController {
         LoginVO user = (LoginVO) session.getAttribute("loginUser");
         String userId = user.getUI_EMAIL();
 
-        // 2. OS별 경로 설정
+        // 2. OS 경로 설정 (운영체제에 따른 베이스 경로)
         String os = System.getProperty("os.name").toLowerCase();
         String osPath = os.contains("win") ? "C:/cloud_storage" : System.getProperty("user.home") + "/cloud_storage";
 
-        // 3. 파일 정보 가져오기
+        // 3. 파일 정보 조회
         Object fileIdObj = data.get("fileId");
         if (fileIdObj == null) {
             result.put("status", "fail");
             return result;
         }
-        
+
         int fileId = Integer.parseInt(fileIdObj.toString());
         FileManageVO vo = new FileManageVO();
         vo.setFM_ID(fileId);
 
         FileManageVO resultVO = mainMapper.fileData(vo);
-        
         if (resultVO == null) {
             result.put("status", "not_found");
             return result;
         }
 
-        // 4. 실제 파일 객체 생성
-        String path = osPath +"/uploads/"+ userId + "/" + resultVO.getFM_FILE_NAME();
-        File file = new File(path);
+        // 재귀적 경로 조회를 통한 full path 가져오기
+        FileManageVO filePathVo = new FileManageVO();
+        filePathVo.setFM_ID(fileId);
+        FileManageVO filePathData = mainMapper.filePathData(filePathVo);
+        
+        String fileFullPaht = "";
+        if (filePathData != null && filePathData.getFULL_PATH() != null) {
+            fileFullPaht = "/" + filePathData.getFULL_PATH();
+        }
 
-        if (file.exists()) {
-            // 5. 다운로드를 위한 응답 헤더 설정
-            // 한글 파일명 깨짐 방지 인코딩
+        // 실제 물리 경로 생성
+        String physicalPath = osPath + "/uploads/" + userId + fileFullPaht;
+        File targetFile = new File(physicalPath);
+
+        if (!targetFile.exists()) {
+            result.put("status", "file_not_exists");
+            return result;
+        }
+
+        // 4. 폴더 vs 파일 분기 처리
+        if ("D".equals(resultVO.getFM_FILE_TYPE())) {
+            // [폴더 다운로드: ZIP 압축]
+            String zipFileName = URLEncoder.encode(resultVO.getFM_FILE_NAME(), "UTF-8").replaceAll("\\+", "%20") + ".zip";
+            
+            response.setContentType("application/zip");
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + zipFileName + "\"");
+
+            try (ZipOutputStream zos = new ZipOutputStream(response.getOutputStream(), StandardCharsets.UTF_8)) {
+                // 재귀 함수 호출 (targetFile: 실제폴더, targetFile.getName(): 압축파일 내 폴더명)
+                compressFolder(targetFile, targetFile.getName(), zos);
+                zos.flush();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null; // 스트림을 직접 썼으므로 null 반환
+
+        } else {
+            // [단일 파일 다운로드]
             String encodedFileName = URLEncoder.encode(resultVO.getFM_FILE_NAME(), "UTF-8").replaceAll("\\+", "%20");
             
             response.setContentType("application/octet-stream");
             response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFileName + "\"");
-            response.setContentLength((int) file.length());
+            response.setContentLength((int) targetFile.length());
 
-            // 6. 파일 읽어서 전송 (try-with-resources로 스트림 자동 닫기)
-            try (InputStream is = new FileInputStream(file);
-                OutputStream osStream = response.getOutputStream()) {
+            try (InputStream is = new FileInputStream(targetFile);
+                 OutputStream osStream = response.getOutputStream()) {
                 StreamUtils.copy(is, osStream);
                 osStream.flush();
             }
-            
-            // 파일 전송 후에는 Map을 리턴해도 무시되므로 null을 반환하거나 종료합니다.
-            return null; 
-        } else {
-            result.put("status", "file_not_exists");
-            return result;
+            return null;
         }
     }
+
+    /**
+     * 폴더를 재귀적으로 압축기에 담는 메서드
+     */
+    private void compressFolder(File fileToZip, String pathInZip, ZipOutputStream zos) throws IOException {
+        if (fileToZip.isHidden()) return;
+
+        if (fileToZip.isDirectory()) {
+            // 1. 폴더 엔트리 추가 (마지막에 / 필수)
+            ZipEntry zipEntry = new ZipEntry(pathInZip + "/");
+            zos.putNextEntry(zipEntry);
+            zos.closeEntry();
+            
+            // 2. 하위 내용 반복 처리
+            File[] children = fileToZip.listFiles();
+            if (children != null) {
+                for (File childFile : children) {
+                    compressFolder(childFile, pathInZip + "/" + childFile.getName(), zos);
+                }
+            }
+        } else {
+            // 3. 파일 엔트리 추가 및 데이터 복사
+            try (FileInputStream fis = new FileInputStream(fileToZip)) {
+                ZipEntry zipEntry = new ZipEntry(pathInZip);
+                zos.putNextEntry(zipEntry);
+                StreamUtils.copy(fis, zos);
+                zos.closeEntry();
+            }
+        }
+    }
+
 
     @RequestMapping("/api/newFolder")
     @ResponseBody
@@ -251,9 +328,20 @@ public class FileUploadController {
             String os = System.getProperty("os.name").toLowerCase();
             String rootPath = os.contains("win") ? "C:" : System.getProperty("user.home");
             
+            FileManageVO filePathVo = new FileManageVO();
+            filePathVo.setFM_ID(parentId);
+
+            String fileFullPaht = "";
+            FileManageVO filePathData = mainMapper.filePathData(filePathVo);
+            if (filePathData == null) {
+                System.out.println("데이터가 없어서 null이 담겼습니다.");
+            } else {
+                fileFullPaht = "/"+filePathData.getFULL_PATH();
+            }
+
             // 실제 저장될 물리 경로 (예: C:/upload/유저이메일/폴더명)
             // 유저별로 공간을 분리하는 것이 보안상 좋습니다.
-            String relativePath = uploadPath + user.getUI_EMAIL() + "/" + folderName;
+            String relativePath = uploadPath + user.getUI_EMAIL() + fileFullPaht+ "/" + folderName;
             File saveDir = new File(rootPath + relativePath);
             
             // 4. 물리 폴더 생성 및 체크
@@ -331,12 +419,23 @@ public class FileUploadController {
 
                     // select 한 데이터가 존재할경우 해당 경로에 존재하는 파일 제거
                     if(fileData != null){
+
+                        FileManageVO filePathVo = new FileManageVO();
+                        filePathVo.setFM_ID(fileIdInt);
+
+                        String fileFullPaht = "";
+                        FileManageVO filePathData = mainMapper.filePathData(filePathVo);
+                        if (filePathData == null) {
+                            System.out.println("데이터가 없어서 null이 담겼습니다.");
+                        } else {
+                            fileFullPaht = "/"+filePathData.getFULL_PATH();
+                        }
+                        
                         // 파일경로
-                        String filePath = osPath+"/uploads/"+fileData.getFM_UI_USER_EMAIL()+"/"+fileData.getFM_FILE_NAME();
+                        String filePath = osPath+"/uploads/"+fileData.getFM_UI_USER_EMAIL()+fileFullPaht;
                         // 해당 경로 파일 변수지정
 
                         if ("D".equals(fileType)){
-                            
                             File folder = new File(filePath);
                             System.out.println("exists=" + folder.exists());
                             System.out.println("isDirectory=" + folder.isDirectory());
@@ -349,14 +448,16 @@ public class FileUploadController {
                                     System.out.println("폴더 및 하위 항목 삭제 완료");
                                 }
                             }
+                            // 폴더일 경우 삭제로직
+                            mainMapper.deleteFolderRecursive(vo);
                         }else{
                             File file = new File(filePath);
                             if(file.exists()) {
                                 file.delete();
                             }
+                            // 파일일경우 삭제로직
+                            mainMapper.fileDelteData(vo);
                         }
-                        // db에서 데이터 삭제
-                        mainMapper.fileDelteData(vo);
                     }
                 }
                 result.put("status", "success");
@@ -368,6 +469,43 @@ public class FileUploadController {
             result.put("status", "error");
             result.put("message", e.getMessage());
         }
+        return result;
+    }
+
+    @RequestMapping("/api/fileTypeChk")
+    @ResponseBody
+    public Map<String, Object> fileTypeChk(HttpServletRequest request, @RequestBody Map<String, Object> data){
+        Map<String, Object> result = new HashMap<>();
+
+        try{
+            // 파일 관련 컬럼 세팅
+            FileManageVO vo = new FileManageVO();
+    
+            Object fileId = data.get("fileId");
+            Integer intFileId = Integer.parseInt(String.valueOf(fileId));
+            // 조회에 필요한 데이터 세팅
+            vo.setFM_ID(intFileId);
+            FileManageVO fileData = mainMapper.fileData(vo);
+    
+            // 선택한 파일의 종류(D 폴더, F 파일) 변수화
+            String fileType = fileData.getFM_FILE_TYPE();
+            // 선택한 파일의 상위 폴더ID 변수화
+            Integer upFileId = fileData.getFM_UP_FILE_ID();
+
+            // 결과 값으로 파일타입 전송
+            result.put("fileType", fileType);
+            // 파일 ID 전송
+            result.put("fileId", fileId);
+            // 상위 폴더ID 전송
+            result.put("upFileId", upFileId);
+            
+            result.put("status", "success");
+        }catch(Exception e){
+            e.printStackTrace();
+            result.put("status", "error");
+            result.put("message", e.getMessage());
+        }
+
         return result;
     }
 }
