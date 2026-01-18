@@ -41,9 +41,25 @@ export default function Content() {
     // 이전 디렉토리 ID
     let [backFileId, setBackFileId] = useState('');
 
-    let toggleAllSelect = () => {
-        chkstatus(!chkStatus);
-    };
+let toggleAllSelect = () => {
+    // 1. 상태를 미리 반전시켜서 변수에 담습니다 (비동기 문제 방지)
+    const nextStatus = !chkStatus; 
+    chkstatus(nextStatus);
+
+    if (nextStatus) {
+        // [전체 선택]
+        // filter로 -1이 아닌 항목만 먼저 거른 뒤, 그 데이터들의 fm_ID만 추출합니다.
+        const allIds = itemList
+            .filter(item => item.fm_ID !== -1) // fm_ID가 -1인 '뒤로가기' 제외
+            .map(item => item.fm_ID);
+            
+        setSelectedIds(allIds);
+    } else {
+        // [전체 해제]
+        // 빈 배열을 넣어 아무것도 선택되지 않은 상태로 만듭니다.
+        setSelectedIds([]);
+    }
+};
 
     // 새폴더
     let toggleNamePop = () => {
@@ -264,8 +280,19 @@ export default function Content() {
             .then((res) => res.json())
             .then((data) => {
                 if (data.status === "success" && data.list) {
+                    let fileList = [...data.list];
+
                     // 서버에서 받은 list를 상태에 저장
-                    setItemList(data.list); 
+                    if(fileId != 0){
+                        const backButton = {
+                            fm_ID: -1, // 서버에서 넘겨준 부모 폴더 ID (필요에 따라 조정)
+                            fm_FILE_NAME: "뒤로가기",
+                            fm_FILE_TYPE: "B",
+                            fm_FILE_EXTENSION_TYPE: "back"
+                        };
+                        fileList = [backButton, ...fileList];
+                    }
+                    setItemList(fileList); 
                 }
             })
         }catch{
@@ -371,14 +398,18 @@ export default function Content() {
             if (data.status === "success") {
                 // 파일의 타입이 폴더(type : D)일 경우에만 작동
                 if (data.fileType === "D") {
-                // 선택한 파일 ID 세팅
-                setNowFileId(data.fileId);
+                    // 선택한 파일 ID 세팅
+                    setNowFileId(data.fileId);
 
-                // 선택한 폴더의 상위폴더ID 세팅
-                setBackFileId(data.upFileId);
+                    // 선택한 폴더의 상위폴더ID 세팅
+                    setBackFileId(data.upFileId);
 
-                // 선택한 폴더의 리스트 세로 세팅 
-                fileListFunction(data.fileId);
+                    // 폴더 진입 시 선택되어있던 리스트 초기화
+                    setSelectedIds([]);
+
+                    // 선택한 폴더의 리스트 세로 세팅 
+                    fileListFunction(data.fileId);
+
                 }
             }
         } catch (err) {
@@ -387,8 +418,45 @@ export default function Content() {
     }
 
     // 이걸 선택할 경우 상위 폴더로 이동
-    const backFolderList = () => {
-        fileListFunction(backFileId);
+    const backFolderList = async () => {
+        if(backFileId == "0"){
+            fileListFunction(backFileId);
+            settopFileId("0");
+            setNowFileId("0");
+            setBackFileId("");
+            setSelectedIds([]);
+        }else{
+            try {
+                const res = await fetch('/api/fileTypeChk', {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        fileId: backFileId // 직접 받은 ID 사용
+                    })
+                });
+                
+                const data = await res.json();
+    
+                if (data.status === "success") {
+                        // 파일의 타입이 폴더(type : D)일 경우에만 작동
+                        if (data.fileType === "D") {
+                            // 선택한 파일 ID 세팅
+                            setNowFileId(data.fileId);
+                            // 선택한 폴더의 상위폴더ID 세팅
+                            setBackFileId(data.upFileId);
+                            // 폴더 진입 시 선택되어있던 리스트 초기화
+                            setSelectedIds([]);
+        
+                            // 선택한 폴더의 리스트 세로 세팅 
+                            fileListFunction(data.fileId);
+                        }
+                }
+            } catch (err) {
+                console.error("폴더 진입 오류:", err);
+            }
+        }
     }
 
 
@@ -406,17 +474,34 @@ export default function Content() {
             settopFileId(id);
         }
 
-        // selectFileStat(!selectFile);
-        setSelectedIds(prev => {
-            if (prev.includes(id)) {
-                // 이미 선택되어 있다면 제거
-                return prev.filter(selectedId => selectedId !== id);
-            } else {
-                // 선택되어 있지 않다면 추가
-                return [...prev, id];
-            }
-        });
+        if(id !== -1){
+            // selectFileStat(!selectFile);
+            setSelectedIds(prev => {
+                if (prev.includes(id)) {
+                    // 이미 선택되어 있다면 제거
+                    return prev.filter(selectedId => selectedId !== id);
+                } else {
+                    // 선택되어 있지 않다면 추가
+                    return [...prev, id];
+                }
+            });
+        }else{
+            backFolderList();
+        }
     };
+
+    useEffect(() => {
+        // 뒤로가기(-1)를 제외한 실제 선택 가능한 아이템들만 필터링
+        const actualItems = itemList.filter(item => item.fm_ID !== -1);
+
+        // 실제 아이템이 존재하고, 
+        // 선택된 ID의 개수가 실제 아이템의 개수와 일치하는지 확인
+        if (actualItems.length > 0 && selectedIds.length === actualItems.length) {
+            chkstatus(true);
+        } else {
+            chkstatus(false);
+        }
+    }, [selectedIds, itemList]);
     
     return(
         <div id="contents">
@@ -545,7 +630,7 @@ export default function Content() {
                     let isSelected = selectedIds.includes(item.fm_ID);
                     
                     return (
-                        <div className={`file ${isSelected ? "on" : ""}`} key={item.fm_ID} onClick={() => handleFileClick(item.fm_ID)} onDoubleClick={() => fileDbClickFunction(item.fm_ID)}>
+                        <div className={`file ${isSelected ? "on" : ""}`} fileType={fileExt} key={item.fm_ID} onClick={() => handleFileClick(item.fm_ID)} onDoubleClick={() => fileDbClickFunction(item.fm_ID)}>
                             <div className="file_icon">
                                 {/* 결정된 아이콘 적용 및 폴더/파일 색상 구분(선택사항) */}
                                 <FontAwesomeIcon 
