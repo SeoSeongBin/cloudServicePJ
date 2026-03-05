@@ -508,4 +508,34 @@ public class FileUploadController {
 
         return result;
     }
+
+    @RequestMapping("/api/fileUseStorage")
+    @ResponseBody
+    public Map<String, Object> fileUseStorage(HttpServletRequest request, @RequestBody Map<String, Object> data){
+        Map<String, Object> result = new HashMap<>();
+
+        try{
+            // 파일 관련 컬럼 세팅
+            FileManageVO vo = new FileManageVO();
+            // 로그인 정보 가오
+            HttpSession session = request.getSession(false);
+            // 세션에서 가져온 email(id)값 변수처리
+            LoginVO user = (LoginVO) session.getAttribute("loginUser");
+            String userEmail = user.getUI_EMAIL();
+
+            vo.setFM_UI_USER_EMAIL(userEmail);
+
+            FileManageVO fileData = mainMapper.useFileCapacity(vo);
+
+            Integer useStorage = fileData.getUSE_STORAGE();
+
+            result.put("useStorage", useStorage);
+        }catch(Exception e){
+            e.printStackTrace();
+            result.put("status", "error");
+            result.put("message", e.getMessage());
+        }
+
+        return result;
+    }
 }

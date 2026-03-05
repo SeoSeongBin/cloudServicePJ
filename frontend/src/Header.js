@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleUp, faCircleUser, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
+// 사용중인 용량 가져오는 import
+import { useStorage } from './StorageContext';
+
 export default function Header() {
     const navigate = useNavigate();
 
@@ -13,6 +16,8 @@ export default function Header() {
     const toggleUserInfo = () => {
         setIsOpen(!isOpen);
     };
+
+    const { fetchStorage } = useStorage(); // StorageContext에서 가져오기
 
     // 세션정보 가져오기
     useEffect(() => {
@@ -33,6 +38,8 @@ export default function Header() {
             if(data){
                 // 로그인 정보가 존재할 경우 유저명 세팅
                 setUserNM(data.userInfo.ui_NAME);
+
+                fetchStorage();
             }else{
                 navigate("/login");
             }

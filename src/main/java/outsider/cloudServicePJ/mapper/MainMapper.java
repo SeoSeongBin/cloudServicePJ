@@ -15,4 +15,5 @@ public interface MainMapper {
     List<FileManageVO> fileListData(FileManageVO data);
     public void fileDelteData(FileManageVO data);
     public void deleteFolderRecursive(FileManageVO data);
+    public FileManageVO useFileCapacity(FileManageVO data);
 }

@@ -263,7 +263,12 @@
         vertical-align: top;
         display: inline-block;
     }
-    #navi .naviTit {
+
+    #navi #navi_top {
+        height: calc(100% - 141px);
+    }
+
+    #navi #navi_top .naviTit {
         font-size: 18px;
         text-align: center;
         padding: 10px 20px;
@@ -271,22 +276,53 @@
         border-bottom: 1px solid #ddd;
     }
 
-    #navi p {
+    #navi #navi_top p {
         padding: 10px;
         font-size: 16px;
         cursor: pointer;
     }
 
-    #navi p:hover {
+    #navi #navi_top p:hover {
         background-color: rgba(83, 83, 238, 0.7);
         color: #fff;
         font-weight: bold;
     }
-    #navi p.on {
+    #navi #navi_top p.on {
         background-color: rgb(83, 83, 238);
         color: #fff;
         font-weight: bold;
     }
+
+    #navi #navi_bottom {
+        height: 120px;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+    }
+    
+    #navi #navi_bottom #storage_use_text {
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    #navi #navi_bottom #storage_use_text #now_storage_use {
+        color: #5353ee;
+        font-weight: bold;
+    }
+    
+    #navi #navi_bottom #storage_use_gaze_bac {
+        width: 100%;
+        height: 5px;
+        background-color: #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    #navi #navi_bottom #storage_use_gaze{
+        height: 100%;
+        width: 50%;
+        background-color: #5353ee;
+    }
+    
     /* navi css end */
 
     /* content css start */
@@ -464,7 +500,7 @@
     }
 
     .upload_waiting_area .waiting_list {
-        height: calc(100% - 104px);
+        height: calc(100% - 122px);
         border-bottom: 1px solid #eee;
         overflow-y: auto;
     }

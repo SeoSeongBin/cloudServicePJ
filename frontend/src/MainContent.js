@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom"; // 상단에 추가
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSquareCheck, faUpload, faTrashCan, faFileZipper, faTimes, faFile, faCirclePause, faArrowUpFromBracket,faFileCode,faFileImage, faFilePdf,faFilePowerpoint,faFileCsv,faFileWord, faFolder, faSpinner,faCheckCircle, faDownload, faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import { faSquare } from '@fortawesome/free-regular-svg-icons';
+import { useStorage } from './StorageContext';
+import axios from "axios"; 
 
 export default function Content() {
     const navigate = useNavigate();
@@ -40,6 +42,19 @@ export default function Content() {
     let [nowFileId, setNowFileId] = useState('0');
     // 이전 디렉토리 ID
     let [backFileId, setBackFileId] = useState('');
+    
+    // 컴포넌트 내부 상태 선언부
+    const [loadedBytes, setLoadedBytes] = useState({}); // 각 파일별 전송된 바이트 { index: size }
+    // 전체 용량 계산
+    const totalSize = uploadQueue.reduce((acc, file) => acc + file.size, 0);
+    // 현재까지 전송된 총 용량 계산
+    const currentLoadedTotal = Object.values(loadedBytes).reduce((acc, byte) => acc + byte, 0);
+    // 전체 진행 퍼센트
+    const totalProgress = totalSize > 0 ? Math.floor((currentLoadedTotal / totalSize) * 100) : 0;
+    // 완료된 파일 개수 (실제 완료된 시점에 카운트)
+    const finishedCount = Object.values(uploadStatus).filter(status => status === 'success').length;
+
+    const { addStorage } = useStorage();
 
 let toggleAllSelect = () => {
     // 1. 상태를 미리 반전시켜서 변수에 담습니다 (비동기 문제 방지)
@@ -178,53 +193,46 @@ let toggleAllSelect = () => {
     const startUpload = async () => {
         if (uploadQueue.length === 0) return;
 
-        const formData = new FormData();
-        uploadQueue.forEach(file => formData.append('files', file));
-        
-        console.log("전송 직전 parentId:", nowFileId);
-        formData.append('parentId', nowFileId);
+        setUploadStatus({}); // 상태 초기화
+        setLoadedBytes({});  // 진행도 초기화
 
-        setUploadStatus("uploading");
+        // 파일별로 순차적(또는 병렬) 업로드 루프
+        for (let i = 0; i < uploadQueue.length; i++) {
+            const file = uploadQueue[i];
+            const formData = new FormData();
+            formData.append('files', file);
+            formData.append('parentId', nowFileId);
 
-        try {
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
+            // 해당 파일 업로드 시작 상태 표시
+            setUploadStatus(prev => ({ ...prev, [i]: "uploading" }));
 
-            // 1. 우선 HTTP 응답 자체가 성공(200 OK)인지 확인
-            if (res.ok) {
-                // 2. 서버가 보낸 Map(JSON) 데이터를 파싱
-                const data = await res.json(); 
+            try {
+                const res = await axios.post('/api/upload', formData, {
+                    onUploadProgress: (progressEvent) => {
+                        // 실시간 진행 바이트 업데이트
+                        setLoadedBytes(prev => ({
+                            ...prev,
+                            [i]: progressEvent.loaded
+                        }));
+                    }
+                });
 
-                // 3. 서버가 담아준 status 값이 "success"인지 확인
-                if (data.status === "success") {
-                    setUploadStatus("success");
-                    setProgress(100);
-                    setTimeout(() => {
-                        alert("업로드 완료!");
-                        setUploadQueue([]);
-                        setUploadStatus("idle");
-                    }, 1000);
-
-                    fileListFunction(nowFileId);
+                if (res.data.status === "success") {
+                    setUploadStatus(prev => ({ ...prev, [i]: "success" }));
                 } else {
-                    // 서버에서 result.put("status", "error")를 보낸 경우
-                    console.error("Server Logic Error:", data.message);
-                    alert("서버 오류: " + data.message);
-                    setUploadStatus("idle");
+                    setUploadStatus(prev => ({ ...prev, [i]: "idle" }));
                 }
-            } else {
-                // HTTP 상태 코드가 400, 500번대인 경우
-                alert("업로드 실패 (HTTP 에러)");
-                setUploadStatus("idle");
+            } catch (err) {
+                console.error("업로드 에러", err);
+                setUploadStatus(prev => ({ ...prev, [i]: "idle" }));
             }
-        } catch (err) {
-            // 네트워크 연결 오류 등 아예 서버에 닿지 못한 경우
-            console.error("Network Error:", err);
-            alert("네트워크 오류가 발생했습니다.");
-            setUploadStatus("idle");
         }
+
+        // 모든 루프 종료 후 리스트 새로고침
+        alert("업로드 완료!");
+        fileListFunction(nowFileId);
+        // 선택 사항: 완료 후 대기열 비우기
+        // setUploadQueue([]);
     };
 
     const namePopSaveBtn = () => {
@@ -546,59 +554,77 @@ let toggleAllSelect = () => {
                 <FontAwesomeIcon icon={faArrowUpFromBracket} />
             </div>
 
-                <div className={`upload_waiting_area ${uploadShowHide ? "" : "dn"}`}>
-                    <div className="waiting_header">
-                        {/* 완료된 파일 숫자는 나중에 상태값으로 관리하면 좋습니다 (현재는 0으로 표시) */}
-                        <h2>
-                            업로드 <span>( 0 / {uploadQueue.length} 개 완료 )</span> 
-                            <i className="close_btn" onClick={toggleUploadPopShowHide}>
-                                <FontAwesomeIcon icon={faTimes} />
-                            </i>
-                        </h2>
-                        <div className="waiting_file_progress_bar">
-                            <div className="waiting_file_gager" style={{ width: '0%' }}></div>
-                        </div>
+            <div className={`upload_waiting_area ${uploadShowHide ? "" : "dn"}`}>
+                <div className="waiting_header">
+                    <h2>
+                        업로드 
+                        <span>
+                            ( {finishedCount} / {uploadQueue.length} 개 완료 - {totalProgress}% )
+                        </span> 
+                        <i className="close_btn" onClick={toggleUploadPopShowHide}>
+                            <FontAwesomeIcon icon={faTimes} />
+                        </i>
+                    </h2>
+                    <div className="waiting_file_progress_bar">
+                        {/* 전체 용량 대비 실제 전송량(Byte) 기반 프로그레스 바 */}
+                        <div 
+                            className="waiting_file_gager" 
+                            style={{ 
+                                width: `${totalProgress}%`, 
+                                transition: 'width 0.2s linear',
+                                backgroundColor: '#007bff'
+                            }}
+                        ></div>
                     </div>
+                    <div className="waiting_size_info" style={{ fontSize: '12px', marginTop: '5px', color: '#666' }}>
+                        {(currentLoadedTotal / (1024 * 1024)).toFixed(2)} MB / {(totalSize / (1024 * 1024)).toFixed(2)} MB 전송 중
+                    </div>
+                </div>
 
                 <div className="waiting_list">
-                {uploadQueue.map((file, index) => {
-                    const fileExt = file.name.split('.').pop().toLowerCase();
-                    let fileIcon = faFile;
-                    if (['css','jsp','html','java','js','xml'].includes(fileExt)) fileIcon = faFileCode;
-                    if (['jpg', 'png', 'gif', 'jpeg'].includes(fileExt)) fileIcon = faFileImage;
-                    if (fileExt === 'pdf') fileIcon = faFilePdf;
-                    if (fileExt === 'zip') fileIcon = faFileZipper;
-                    if (['ppt','pptx'].includes(fileExt)) fileIcon = faFilePowerpoint;
-                    if (fileExt === 'csv') fileIcon = faFileCsv;
-                    if (['doc','docx'].includes(fileExt)) fileIcon = faFileWord;
+                    {uploadQueue.map((file, index) => {
+                        const fileExt = file.name.split('.').pop().toLowerCase();
+                        let fileIcon = faFile;
+                        if (['css','jsp','html','java','js','xml'].includes(fileExt)) fileIcon = faFileCode;
+                        if (['jpg', 'png', 'gif', 'jpeg'].includes(fileExt)) fileIcon = faFileImage;
+                        if (fileExt === 'pdf') fileIcon = faFilePdf;
+                        if (fileExt === 'zip') fileIcon = faFileZipper;
+                        if (['ppt','pptx'].includes(fileExt)) fileIcon = faFilePowerpoint;
+                        if (fileExt === 'csv') fileIcon = faFileCsv;
+                        if (['doc','docx'].includes(fileExt)) fileIcon = faFileWord;
 
-                    return (
-                        <div className={`waiting_file ${uploadStatus === 'success' ? 'finished' : ''}`} key={index}>
-                            <div className="file_icon">
-                                <FontAwesomeIcon icon={fileIcon} />
+                        // 개별 파일의 진행률 계산 (필요 시 개별 바 표시용)
+                        const fileLoaded = loadedBytes[index] || 0;
+                        const filePercent = Math.floor((fileLoaded / file.size) * 100);
+
+                        return (
+                            <div className={`waiting_file ${uploadStatus[index] === 'success' ? 'finished' : ''}`} key={index}>
+                                <div className="file_icon">
+                                    <FontAwesomeIcon icon={fileIcon} />
+                                </div>
+                                <div className="file_info">
+                                    <p className="file_name" title={file.name}>{file.name}</p>
+                                    <p className="file_size">
+                                        {(file.size / (1024 * 1024)).toFixed(2)} MB
+                                        {uploadStatus[index] === "uploading" && ` (${filePercent}%)`}
+                                    </p>
+                                </div>
+                                <div className="waiting_file_status">
+                                    {/* 개별 파일 상태(uploadStatus[index])에 따른 아이콘 분기 */}
+                                    {(!uploadStatus[index] || uploadStatus[index] === "idle") && <FontAwesomeIcon icon={faCirclePause} />}
+                                    {uploadStatus[index] === "uploading" && <FontAwesomeIcon icon={faSpinner} spin color="#007bff" />}
+                                    {uploadStatus[index] === "success" && <FontAwesomeIcon icon={faCheckCircle} color="#28a745" />}
+                                </div>
                             </div>
-                            <div className="file_info">
-                                <p className="file_name" title={file.name}>{file.name}</p>
-                                <p className="file_size">
-                                    {(file.size / (1024 * 1024)).toFixed(2)} MB
-                                </p>
-                            </div>
-                            <div className="waiting_file_status">
-                                {/* 상태값(uploadStatus)에 따라 아이콘을 분기 처리 */}
-                                {uploadStatus === "idle" && <FontAwesomeIcon icon={faCirclePause} />}
-                                {uploadStatus === "uploading" && <FontAwesomeIcon icon={faSpinner} spin color="#007bff" />}
-                                {uploadStatus === "success" && <FontAwesomeIcon icon={faCheckCircle} color="#28a745" />}
-                            </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })}
                 </div>
-                    <div className="upload_waiting_btn_area">
-                        {/* 이전에 만든 startUpload 함수를 여기에 연결하세요 */}
-                        <div className="btn start_upload_btn" onClick={startUpload}>시작</div>
-                        <div className="btn stop_upload_btn">일시정지</div>
-                    </div>
+
+                <div className="upload_waiting_btn_area">
+                    <div className="btn start_upload_btn" onClick={startUpload}>시작</div>
+                    <div className="btn stop_upload_btn">일시정지</div>
                 </div>
+            </div>
                 
             <div className="file_wrap"
                 onDragOver={handleDragOver}

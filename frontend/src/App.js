@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-route
 import './App.css';
 import Login from './login';
 import Sign_up from './SignUp';
-import Main from './main';
+import Main from './Main';
+import { StorageProvider } from './StorageContext';
 
 // 로그인 체크 및 라우팅 처리 담당 컴포넌트
 function SessionChecker() {
@@ -26,23 +27,25 @@ function SessionChecker() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* 루트 경로에서 세션 체크 */}
-        <Route path="/" element={<SessionChecker />} />
+    <StorageProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* 루트 경로에서 세션 체크 */}
+          <Route path="/" element={<SessionChecker />} />
 
-        {/* 로그인 화면 */}
-        <Route path="/login" element={<Login />} />
+          {/* 로그인 화면 */}
+          <Route path="/login" element={<Login />} />
 
-        {/* 회원가입 */}
-        <Route path="/sign_up" element={<Sign_up />} />
+          {/* 회원가입 */}
+          <Route path="/sign_up" element={<Sign_up />} />
 
-        {/* 메인 페이지 */}
-        <Route path="/main" element={<Main />}>
-          
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          {/* 메인 페이지 */}
+          <Route path="/main" element={<Main />}>
+            
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </StorageProvider>
   );
 }
 

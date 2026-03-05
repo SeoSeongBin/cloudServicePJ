@@ -89,5 +89,12 @@
             SELECT FM_ID FROM FolderHierarchy
         )
     </delete>
-
+    <select id="useFileCapacity" resultType="outsider.cloudServicePJ.VO.FileManageVO">
+        SELECT
+            SUM(FM_FILE_SIZE) AS USE_STORAGE
+        FROM
+            FILE_MANAGE
+        WHERE
+            FM_UI_USER_EMAIL = #{FM_UI_USER_EMAIL}
+    </select>
 </mapper>
