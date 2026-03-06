@@ -6,9 +6,9 @@ export default function Navi() {
     const [activeIndex, setActiveIndex] = useState(0);
     const menuList = ["My Cloud"];
     // 현재 사용중인 용량
-    const { usedStorage, fetchStorage } = useStorage();
+    const { usedStorage, usedStoragePer, fetchStorage } = useStorage();
     // 할당된 용량
-    const capacity = "0";
+    const capacity = "10";
 
     return (
             <div id="navi">
@@ -30,7 +30,7 @@ export default function Navi() {
                 <div id="navi_bottom" className="storage_use">
                     <div id="storage_use_text"><span id='now_storage_use'>{usedStorage} GB</span> / {capacity} GB</div>
                     <div id="storage_use_gaze_bac">
-                        <div id='storage_use_gaze'></div>
+                        <div id='storage_use_gaze' style={{ width: `${usedStoragePer}%` }}></div>
                     </div>
                 </div>
             </div>

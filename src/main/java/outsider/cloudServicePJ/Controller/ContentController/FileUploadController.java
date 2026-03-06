@@ -527,7 +527,7 @@ public class FileUploadController {
 
             FileManageVO fileData = mainMapper.useFileCapacity(vo);
 
-            Integer useStorage = fileData.getUSE_STORAGE();
+            Long useStorage = fileData.getUSE_STORAGE();
 
             result.put("useStorage", useStorage);
         }catch(Exception e){

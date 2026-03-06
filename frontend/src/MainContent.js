@@ -54,7 +54,7 @@ export default function Content() {
     // 완료된 파일 개수 (실제 완료된 시점에 카운트)
     const finishedCount = Object.values(uploadStatus).filter(status => status === 'success').length;
 
-    const { addStorage } = useStorage();
+    const { fetchStorage } = useStorage(); // StorageContext에서 가져오기
 
 let toggleAllSelect = () => {
     // 1. 상태를 미리 반전시켜서 변수에 담습니다 (비동기 문제 방지)
@@ -169,6 +169,8 @@ let toggleAllSelect = () => {
                         alert("삭제가 완료되었습니다.");
                         setSelectedIds([]);
                         fileListFunction(nowFileId);
+
+                        fetchStorage();
                     }else if(data.status === "null"){
                         alert("로그인이 끊어졌습니다.");
                         navigate("/login");
@@ -229,8 +231,9 @@ let toggleAllSelect = () => {
         }
 
         // 모든 루프 종료 후 리스트 새로고침
-        alert("업로드 완료!");
         fileListFunction(nowFileId);
+
+        fetchStorage();
         // 선택 사항: 완료 후 대기열 비우기
         // setUploadQueue([]);
     };

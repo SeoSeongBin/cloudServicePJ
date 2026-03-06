@@ -4,6 +4,7 @@ const StorageContext = createContext();
 
 export const StorageProvider = ({ children }) => {
     const [usedStorage, setUsedStorage] = useState(0);
+    const [usedStoragePer, setUsedStoragePer] = useState(0);
 
     // DB에서 현재 총 용량을 가져오는 함수
     const fetchStorage = () => {
@@ -16,9 +17,11 @@ export const StorageProvider = ({ children }) => {
         }) // 서버의 용량 조회 API
             .then(res => res.json())
             .then(data => {
+                console.log(data);
                 let useStorageGet = (data.useStorage / (1024 ** 3)).toFixed(1);
-                // data.useStorage
-                setUsedStorage(useStorageGet); // DB에서 가져온 값으로 세팅
+                let storagePercent = (useStorageGet / 10 * 100).toFixed(0);
+                setUsedStorage(useStorageGet);
+                setUsedStoragePer(storagePercent);
             })
             .catch(err => console.error("용량 조회 실패:", err));
     };
@@ -29,7 +32,7 @@ export const StorageProvider = ({ children }) => {
     }, []);
 
     return (
-        <StorageContext.Provider value={{ usedStorage, fetchStorage }}>
+        <StorageContext.Provider value={{ usedStorage, usedStoragePer, fetchStorage }}>
             {children}
         </StorageContext.Provider>
     );

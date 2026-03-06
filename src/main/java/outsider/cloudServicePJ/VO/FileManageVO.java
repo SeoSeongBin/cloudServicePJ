@@ -19,5 +19,5 @@ public class FileManageVO {
     private String FULL_PATH;
 
     // 사용중인 용량 표기를 위한 값
-    private Integer USE_STORAGE;
+    private Long USE_STORAGE;
 }

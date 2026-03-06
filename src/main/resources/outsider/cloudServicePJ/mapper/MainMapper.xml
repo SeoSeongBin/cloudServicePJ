@@ -91,7 +91,7 @@
     </delete>
     <select id="useFileCapacity" resultType="outsider.cloudServicePJ.VO.FileManageVO">
         SELECT
-            SUM(FM_FILE_SIZE) AS USE_STORAGE
+            COALESCE(SUM(FM_FILE_SIZE), 0) AS USE_STORAGE
         FROM
             FILE_MANAGE
         WHERE
