@@ -1,7 +1,7 @@
 import react, {useEffect,useState, useRef} from "react";
 import { useNavigate } from "react-router-dom"; // 상단에 추가
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSquareCheck, faUpload, faTrashCan, faFileZipper, faTimes, faFile, faCirclePause, faArrowUpFromBracket,faFileCode,faFileImage, faFilePdf,faFilePowerpoint,faFileCsv,faFileWord, faFolder, faSpinner,faCheckCircle, faDownload, faEllipsis } from '@fortawesome/free-solid-svg-icons';
+import { faSquareCheck, faUpload, faTrashCan, faFileZipper, faTimes, faFile, faCirclePause, faArrowUpFromBracket,faFileCode,faFileImage, faFilePdf,faFilePowerpoint,faFileCsv,faFileWord, faFolder, faSpinner,faCheckCircle, faDownload, faEllipsis, faCircleMinus} from '@fortawesome/free-solid-svg-icons';
 import { faSquare } from '@fortawesome/free-regular-svg-icons';
 import { useStorage } from './StorageContext';
 import axios from "axios"; 
@@ -54,7 +54,7 @@ export default function Content() {
     // 완료된 파일 개수 (실제 완료된 시점에 카운트)
     const finishedCount = Object.values(uploadStatus).filter(status => status === 'success').length;
 
-    const { fetchStorage } = useStorage(); // StorageContext에서 가져오기
+    const { usedStorage, usedStoragePer, fetchStorage } = useStorage(); // StorageContext에서 가져오기
 
 let toggleAllSelect = () => {
     // 1. 상태를 미리 반전시켜서 변수에 담습니다 (비동기 문제 방지)
@@ -195,6 +195,20 @@ let toggleAllSelect = () => {
     const startUpload = async () => {
         if (uploadQueue.length === 0) return;
 
+        // 대기열에 있는 모든 파일의 총 용량 계산 (Byte 단위)
+        const queueTotalSize = uploadQueue.reduce((acc, file) => acc + file.size, 0);
+        
+        // 현재 사용 중인 용량 (usedStorage는 GB 단위 문자열이므로 Byte로 변환)
+        // 또는 StorageContext에서 raw byte 값을 가져오는 것이 더 정확합니다.
+        const currentByte = Number(usedStorage) * (1024 ** 3);
+        const limitByte = 10 * (1024 ** 3); // 10GB 제한
+
+        // 용량 초과 체크
+        if (currentByte + queueTotalSize > limitByte) {
+            alert("남은 용량이 부족합니다.");
+            return; // 업로드 시작 자체를 막음
+        }
+
         setUploadStatus({}); // 상태 초기화
         setLoadedBytes({});  // 진행도 초기화
 
@@ -256,11 +270,11 @@ let toggleAllSelect = () => {
             .then((res) => res.json())
             .then((data) => {
                 if (data.status === "success") {
-                    // 1. 성공 시에만 리스트를 새로고침합니다.
-                    // 중요: nowFileId를 직접 넘겨서 최신 리스트를 가져오게 합니다.
+                    // 성공 시에만 리스트를 새로고침합니다.
+                    // nowFileId를 직접 넘겨서 최신 리스트를 가져오게 합니다.
                     fileListFunction(nowFileId);
                     
-                    // 2. 처리가 끝나면 입력창을 비우고 팝업을 닫습니다.
+                    // 처리가 끝나면 입력창을 비우고 팝업을 닫습니다.
                     setFileName('');
                     newNamePopSata(false);
                 } else {
@@ -275,6 +289,11 @@ let toggleAllSelect = () => {
             // 이름 바꾸기 로직 (생략)
         }
     };
+
+    // 리스트 삭제
+    const fileListDel = async () => {
+        console.log("동작확인용");
+    }
 
     // 파일 리스트 불러오는 로직
     const fileListFunction= async (fileId) => {
@@ -614,7 +633,7 @@ let toggleAllSelect = () => {
                                 </div>
                                 <div className="waiting_file_status">
                                     {/* 개별 파일 상태(uploadStatus[index])에 따른 아이콘 분기 */}
-                                    {(!uploadStatus[index] || uploadStatus[index] === "idle") && <FontAwesomeIcon icon={faCirclePause} />}
+                                    {(!uploadStatus[index] || uploadStatus[index] === "idle") && <FontAwesomeIcon icon={faCircleMinus} color="#db2d2d" onClick={fileListDel}/>}
                                     {uploadStatus[index] === "uploading" && <FontAwesomeIcon icon={faSpinner} spin color="#007bff" />}
                                     {uploadStatus[index] === "success" && <FontAwesomeIcon icon={faCheckCircle} color="#28a745" />}
                                 </div>
