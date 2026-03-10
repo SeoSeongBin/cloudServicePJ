@@ -536,11 +536,14 @@
     }
     .upload_waiting_area .waiting_list .waiting_file .file_info {
         flex: 5;
+        max-width: calc(100% - 54px);
     }
     .upload_waiting_area .waiting_list .waiting_file .file_info .file_name {
         font-size: 14px;
-        margin-bottom: 3px;
-        
+        margin-bottom: 5px;
+        word-break: break-all;
+        overflow-wrap: break-word;
+        white-space: normal;
     }
     .upload_waiting_area .waiting_list .waiting_file .file_info .file_size {
         font-size: 12px;

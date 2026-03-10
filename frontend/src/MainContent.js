@@ -290,9 +290,16 @@ let toggleAllSelect = () => {
         }
     };
 
-    // 리스트 삭제
-    const fileListDel = async () => {
+    // 파일 업로드 리스트 삭제
+    const fileListDel = async (targetIndex) => {
         console.log("동작확인용");
+        console.log(uploadQueue);
+        console.log("동작확인용");
+
+        setUploadQueue((prevQueue) => 
+            prevQueue.filter((_, index) => index !== targetIndex)
+        );
+        // uploadQueue
     }
 
     // 파일 리스트 불러오는 로직
@@ -633,7 +640,7 @@ let toggleAllSelect = () => {
                                 </div>
                                 <div className="waiting_file_status">
                                     {/* 개별 파일 상태(uploadStatus[index])에 따른 아이콘 분기 */}
-                                    {(!uploadStatus[index] || uploadStatus[index] === "idle") && <FontAwesomeIcon icon={faCircleMinus} color="#db2d2d" onClick={fileListDel}/>}
+                                    {(!uploadStatus[index] || uploadStatus[index] === "idle") && <FontAwesomeIcon icon={faCircleMinus} color="#db2d2d" onClick={() => fileListDel(index)}/>}
                                     {uploadStatus[index] === "uploading" && <FontAwesomeIcon icon={faSpinner} spin color="#007bff" />}
                                     {uploadStatus[index] === "success" && <FontAwesomeIcon icon={faCheckCircle} color="#28a745" />}
                                 </div>
