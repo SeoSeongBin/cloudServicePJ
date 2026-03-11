@@ -193,39 +193,48 @@ let toggleAllSelect = () => {
 
     // 서버 전송
     const startUpload = async () => {
-        if (uploadQueue.length === 0) return;
+        // 1. 업로드 대기 중인 파일들만 필터링 (success가 아닌 상태)
+        const pendingFiles = uploadQueue.filter((_, i) => 
+            !uploadStatus[i] || uploadStatus[i] === "idle" || uploadStatus[i] === "uploading"
+        );
 
-        // 대기열에 있는 모든 파일의 총 용량 계산 (Byte 단위)
-        const queueTotalSize = uploadQueue.reduce((acc, file) => acc + file.size, 0);
-        
-        // 현재 사용 중인 용량 (usedStorage는 GB 단위 문자열이므로 Byte로 변환)
-        // 또는 StorageContext에서 raw byte 값을 가져오는 것이 더 정확합니다.
-        const currentByte = Number(usedStorage) * (1024 ** 3);
-        const limitByte = 10 * (1024 ** 3); // 10GB 제한
-
-        // 용량 초과 체크
-        if (currentByte + queueTotalSize > limitByte) {
-            alert("남은 용량이 부족합니다.");
-            return; // 업로드 시작 자체를 막음
+        // 2. 업로드할 파일이 하나도 없으면 바로 종료
+        if (pendingFiles.length === 0) {
+            alert("업로드 파일이 없습니다.");
+            return;
         }
 
-        setUploadStatus({}); // 상태 초기화
-        setLoadedBytes({});  // 진행도 초기화
+        // 3. 용량 체크 (전체 큐가 아니라 '새로 올릴 파일들'의 용량만 계산)
+        const pendingTotalSize = pendingFiles.reduce((acc, file) => acc + file.size, 0);
+        
+        const currentByte = Number(usedStorage) * (1024 ** 3);
+        const limitByte = 10 * (1024 ** 3);
 
-        // 파일별로 순차적(또는 병렬) 업로드 루프
+        if (currentByte + pendingTotalSize > limitByte) {
+            alert("남은 용량이 부족합니다.");
+            return;
+        }
+
+        // [주의] setLoadedBytes({}) 로 전체 초기화하면 안 됩니다. 
+        // 성공하지 않은 인덱스만 초기화하거나 그대로 둡니다.
+
         for (let i = 0; i < uploadQueue.length; i++) {
+            // 2. 이미 성공한 파일은 루프 시작점에서 즉시 스킵
+            if (uploadStatus[i] === "success") {
+                continue; 
+            }
+
             const file = uploadQueue[i];
             const formData = new FormData();
             formData.append('files', file);
             formData.append('parentId', nowFileId);
 
-            // 해당 파일 업로드 시작 상태 표시
+            // 상태를 'uploading'으로 변경
             setUploadStatus(prev => ({ ...prev, [i]: "uploading" }));
 
             try {
                 const res = await axios.post('/api/upload', formData, {
                     onUploadProgress: (progressEvent) => {
-                        // 실시간 진행 바이트 업데이트
                         setLoadedBytes(prev => ({
                             ...prev,
                             [i]: progressEvent.loaded
@@ -242,14 +251,10 @@ let toggleAllSelect = () => {
                 console.error("업로드 에러", err);
                 setUploadStatus(prev => ({ ...prev, [i]: "idle" }));
             }
+
+            fileListFunction(nowFileId);
+            fetchStorage();
         }
-
-        // 모든 루프 종료 후 리스트 새로고침
-        fileListFunction(nowFileId);
-
-        fetchStorage();
-        // 선택 사항: 완료 후 대기열 비우기
-        // setUploadQueue([]);
     };
 
     const namePopSaveBtn = () => {
